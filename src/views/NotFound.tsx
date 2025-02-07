@@ -39,7 +39,7 @@ const NotFound = () => {
           src='/images/illustrations/characters/5.png'
           className='object-cover bs-[400px] md:bs-[450px] lg:bs-[500px]'
         />
-        <Button href='/home' component={Link} variant='contained'>
+        <Button href='/' component={Link} variant='contained'>
           Back to Home
         </Button>
       </div>

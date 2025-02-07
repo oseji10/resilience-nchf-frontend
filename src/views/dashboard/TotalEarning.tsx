@@ -53,46 +53,21 @@ const TotalEarning = () => {
   return (
     <Card>
       <CardHeader
-        title='Total Earning'
-        action={<OptionMenu iconClassName='text-textPrimary' options={['Last 28 Days', 'Last Month', 'Last Year']} />}
+        title='Total Utilized'
+        // action={<OptionMenu iconClassName='text-textPrimary' options={['Last 28 Days', 'Last Month', 'Last Year']} />}
       ></CardHeader>
       <CardContent className='flex flex-col gap-11 md:mbs-2.5'>
         <div>
           <div className='flex items-center'>
-            <Typography variant='h3'>$24,895</Typography>
-            <i className='ri-arrow-up-s-line align-bottom text-success'></i>
-            <Typography component='span' color='success.main'>
+            <Typography variant='h3'>₦1,455,895.00</Typography>
+            {/* <i className='ri-arrow-up-s-line align-bottom text-success'></i> */}
+            {/* <Typography component='span' color='success.main'>
               10%
-            </Typography>
+            </Typography> */}
           </div>
-          <Typography>Compared to $84,325 last year</Typography>
+          <Typography>₦125,000 spent last month</Typography>
         </div>
-        <div className='flex flex-col gap-6'>
-          {data.map((item, index) => (
-            <div key={index} className='flex items-center gap-3'>
-              <Avatar src={item.imgSrc} variant='rounded' className='bg-actionHover' />
-              <div className='flex justify-between items-center is-full flex-wrap gap-x-4 gap-y-2'>
-                <div className='flex flex-col gap-0.5'>
-                  <Typography color='text.primary' className='font-medium'>
-                    {item.title}
-                  </Typography>
-                  <Typography>{item.subtitle}</Typography>
-                </div>
-                <div className='flex flex-col gap-2 items-center'>
-                  <Typography color='text.primary' className='font-medium'>
-                    {item.amount}
-                  </Typography>
-                  <LinearProgress
-                    variant='determinate'
-                    value={item.progress}
-                    className='is-20 bs-1'
-                    color={item.color}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        
       </CardContent>
     </Card>
   )

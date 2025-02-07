@@ -17,99 +17,14 @@ import {
   Box,
   Button,
   TablePagination,
+  MenuItem,
 } from '@mui/material';
 import { Delete, Edit, EditCalendar, Visibility } from '@mui/icons-material';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-
-type VisualAcuity = {
-  id: number;
-  name: string;
-  status: string | null;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-};
-
-type Consulting = {
-  consultingId: number;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  visualAcuityFarPresentingLeft?: VisualAcuity | null;
-  visualAcuityFarPresentingRight?: VisualAcuity | null;
-  visualAcuityFarPinholeRight?: VisualAcuity | null;
-  visualAcuityFarPinholeLeft?: VisualAcuity | null;
-  visualAcuityFarBestCorrectedLeft?: VisualAcuity | null;
-  visualAcuityFarBestCorrectedRight?: VisualAcuity | null;
-  visualAcuityNearLeft?: VisualAcuity | null;
-  visualAcuityNearRight?: VisualAcuity | null;
-};
-
-type ContinueConsulting = {
-  intraOccularPressureRight: string | null;
-  intraOccularPressureLeft: string | null;
-  otherComplaintsRight: string | null;
-  otherComplaintsLeft: string | null;
-  detailedHistoryRight: string | null;
-  detailedHistoryLeft: string | null;
-  findingsRight: string | null;
-  findingsLeft: string | null;
-  eyelidRight: string | null;
-  eyelidLeft: string | null;
-  conjunctivaRight: string | null;
-  conjunctivaLeft: string | null;
-  corneaRight: string | null;
-  corneaLeft: string | null;
-  ACRight: string | null;
-  ACLeft: string | null;
-  irisRight: string | null;
-  irisLeft: string | null;
-  pupilRight: string | null;
-  pupilLeft: string | null;
-  lensRight: string | null;
-  lensLeft: string | null;
-  vitreousRight: string | null;
-  vitreousLeft: string | null;
-  retinaRight: string | null;
-  retinaLeft: string | null;
-  otherFindingsRight: string | null;
-  otherFindingsLeft: string | null;
-  chiefComplaintRight: VisualAcuity | null;
-  chiefComplaintLeft: VisualAcuity | null;
-  
-};
+import Cookies from 'js-cookie';
 
 
-
-// type User = {
-//   id: number;
-//   patientId: string;
-//   hospitalFileNumber: string;
-//   firstName: string;
-//   lastName: string;
-//   otherNames?: string | null;
-//   gender: string;
-//   bloodGroup: string;
-//   occupation?: string | null;
-//   dateOfBirth: string;
-//   address?: string | null;
-//   status: string;
-//   createdAt: string;
-//   updatedAt: string;
-//   deletedAt?: string | null;
-// };
-
-type User = {
-  userId: number;
-  status: number;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string | null;
-  // patient: Patient;
-  // consulting?: Consulting | null;
-  // continueConsulting?: ContinueConsulting | null;
-};
 
 const modalStyle = {
   position: 'absolute' as 'absolute',
@@ -135,6 +50,7 @@ const formatDate = (dateString: string) => {
 
 const EditProfile = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -143,23 +59,65 @@ const EditProfile = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-
+const [createLoading, setCreateLoading] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
 const [editUser, setEditUser] = useState<User | null>(null);
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/users`);
-        setUsers(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to load users data.');
-        setLoading(false);
-      }
-    };
-  
-    fetchUsers();
-  }, []);
+
+const [openAddModal, setOpenAddModal] = useState(false);
+const [newUser, setNewUser] = useState({
+  firstName: '',
+  lastName: '',
+  otherNames: '',
+  phoneNumber: '',
+  email: '',
+  role: ''
+});
+const [roles, setRoles] = useState([]);
+
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const token = Cookies.get('authToken');
+
+      // Fetch roles, users, and hospitals in parallel
+      const [rolesResponse, usersResponse, hospitalsResponse] = await Promise.all([
+        axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/roles`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/users`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/hospitals`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+      ]);
+
+      // Set the fetched data
+      setRoles(rolesResponse.data);
+      setUsers(usersResponse.data);
+      setHospitals(hospitalsResponse.data);
+
+    } catch (error) {
+      // Handle error
+      setError('Failed to fetch data.');
+      Swal.fire('Error', 'Failed to fetch data.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
   
   useEffect(() => {
     const filtered = users.filter((user) =>
@@ -241,7 +199,73 @@ const [editUser, setEditUser] = useState<User | null>(null);
   };
 
 
+  const handleOpenModal = () => {
+    setOpenAddModal(true);
+  };
 
+  const handleCloseModal = () => {
+    setOpenAddModal(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewUser({
+      ...newUser,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setCreateLoading(true);
+      const token = Cookies.get("authToken");
+  
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_APP_URL}/admin-users`,
+        newUser,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      Swal.fire("Success", `${response.data.message}`, "success");
+  
+      // setUsers((prevUsers) => [...prevUsers, response.data]); // Update local state
+      setUsers((prevUsers) => [
+        ...prevUsers,
+        {
+          id: response.data.id,
+          firstName: response.data.user.firstName,
+          lastName: response.data.user.lastName,
+          otherNames: response.data.user.otherNames,
+          phoneNumber: response.data.user.phoneNumber,
+          email: response.data.user.email,
+          role: response.data.user.role,
+        },
+      ]);
+      
+      // Clear the form fields
+      setNewUser({
+        firstName: "",
+        lastName: "",
+        otherNames: "",
+        phoneNumber: "",
+        email: "",
+        role: "",
+      });
+  
+      setOpenAddModal(false);
+    } catch (error) {
+      Swal.fire("Error", "Failed to create user.", "error");
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+  
+  
 
 // Function to handle Edit button click
 const handleEdit = (user: User) => {
@@ -288,7 +312,12 @@ const handleEditSubmit = async () => {
 
   return (
     <>
-      <h3>Users</h3>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3>Users</h3>
+              <Button variant="contained" color="primary" onClick={handleOpenModal}>
+                Create New Admin
+              </Button>
+            </div>
       <TextField
         placeholder="Search by name"
         value={searchQuery}
@@ -304,6 +333,7 @@ const handleEditSubmit = async () => {
               <TableCell>User Name</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Phone</TableCell>
+              <TableCell>Hospital</TableCell>
               <TableCell>Role</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -317,6 +347,7 @@ const handleEditSubmit = async () => {
                 </TableCell>
                 <TableCell>{user?.email}</TableCell>
                 <TableCell>{user?.phoneNumber}</TableCell>
+                <TableCell>{user?.hospital?.hospitalShortName}</TableCell>
                 <TableCell>{user?.role?.roleName}</TableCell>
                 <TableCell>
                   <IconButton onClick={() => handleView(user)} color="primary">
@@ -346,6 +377,103 @@ const handleEditSubmit = async () => {
 
       {/* View Modal */}
 
+      <Modal
+  open={openAddModal}
+  onClose={handleCloseModal}
+  aria-labelledby="add-user-modal"
+  aria-describedby="add-user-modal-description"
+>
+  <Box sx={modalStyle}>
+    <Typography variant="h6" gutterBottom>
+      Create New Hospital Admin
+    </Typography>
+    <TextField
+      label="First Name"
+      name="firstName"
+      value={newUser.firstName}
+      onChange={handleInputChange}
+      fullWidth
+      margin="normal"
+    />
+    <TextField
+      label="Last Name"
+      name="lastName"
+      value={newUser.lastName}
+      onChange={handleInputChange}
+      fullWidth
+      margin="normal"
+    />
+    <TextField
+      label="Other Names"
+      name="otherNames"
+      value={newUser.otherNames}
+      onChange={handleInputChange}
+      fullWidth
+      margin="normal"
+    />
+    <TextField
+      label="Phone Number"
+      name="phoneNumber"
+      value={newUser.phoneNumber}
+      onChange={handleInputChange}
+      fullWidth
+      margin="normal"
+    />
+    <TextField
+      label="Email"
+      name="email"
+      value={newUser.email}
+      onChange={handleInputChange}
+      fullWidth
+      margin="normal"
+    />
+
+<TextField
+      select
+      label="Hospital"
+      name="hospital"
+      value={newUser.hospital}
+      onChange={handleInputChange}
+      fullWidth
+      margin="normal"
+    >
+      {hospitals.map((hospital) => (
+        <MenuItem key={hospital.hospitalId} value={hospital.hospitalId}>
+          {hospital.hospitalName}
+        </MenuItem>
+      ))}
+    </TextField>
+
+
+    {/* <TextField
+      select
+      label="Role"
+      name="role"
+      value={newUser.role}
+      onChange={handleInputChange}
+      fullWidth
+      margin="normal"
+    >
+      {roles.map((role) => (
+        <MenuItem key={role.roleId} value={role.roleId}>
+          {role.roleName}
+        </MenuItem>
+      ))}
+    </TextField> */}
+    <Box mt={2} display="flex" justifyContent="flex-end">
+      <Button onClick={handleCloseModal} color="secondary">
+        Cancel
+      </Button>
+      <Button variant="contained" color="primary" onClick={handleSubmit} disabled={createLoading}>
+  {/* {createLoading ? <CircularProgress size={24} /> : "Create User"} */}
+  {createLoading ? <CircularProgress size={24} color="inherit" /> : "Create Admin"}
+</Button>
+
+
+      
+    </Box>
+  </Box>
+</Modal>
 
 
 

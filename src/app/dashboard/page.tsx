@@ -33,9 +33,9 @@ const DashboardAnalytics = () => {
       {/* <Grid item xs={12} md={6} lg={4}>
         <WeeklyOverview />
       </Grid> */}
-      {/* <Grid item xs={12} md={6} lg={4}>
+      <Grid item xs={12} md={6} lg={4}>
         <TotalEarning />
-      </Grid> */}
+      </Grid>
       {/* <Grid item xs={12} md={6} lg={4}>
         <Grid container spacing={6}>
           <Grid item xs={12} sm={6}>
@@ -74,10 +74,10 @@ const DashboardAnalytics = () => {
       {/* <Grid item xs={12} lg={8}>
         <DepositWithdraw />
       </Grid> */}
-      <Grid item xs={12}>
+      {/* <Grid item xs={12}>
       <h4>Recent Patients</h4>
         <Table />
-      </Grid>
+      </Grid> */}
     </Grid>
   )
 }

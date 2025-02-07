@@ -33,12 +33,12 @@ import api, { initializeCsrf } from '../app/utils/api';
 
 
 type FormData = {
-  email: string
+  username: string
   password: string
 }
 
 const initialFormData: FormData = {
-  email: '',
+  username: '',
   password: ''
 }
 
@@ -66,7 +66,7 @@ const Login = () => {
     setSuccessMessage('');
   
     const payload = {
-      email: formData.email,
+      username: formData.username,
       password: formData.password,
     };
     await initializeCsrf();
@@ -113,14 +113,14 @@ const Login = () => {
               <Typography className='mbs-1'>Please sign-in to your account with your email or phone number and password</Typography>
             </div>
             {errorMessage && <Typography color='error'>{errorMessage}</Typography>}
-            {successMessage && <Typography color='success'>{successMessage}</Typography>}
+            {successMessage && <Typography color='primary'>{successMessage}</Typography>}
             <form noValidate autoComplete='off' onSubmit={handleLogin} className='flex flex-col gap-5'>
               <TextField 
                 autoFocus 
                 fullWidth 
-                label='Email'
-                value={formData.email}
-                onChange={e => handleFormChange('email', e.target.value)}
+                label='Phone or Email'
+                value={formData.username}
+                onChange={e => handleFormChange('username', e.target.value)}
               />
               <TextField
                 fullWidth
@@ -145,7 +145,10 @@ const Login = () => {
                 }}
               />
               <div className='flex justify-between items-center gap-x-3 gap-y-1 flex-wrap'>
-                <FormControlLabel control={<Checkbox />} label='Remember me' />
+                {/* <FormControlLabel control={<Checkbox />} label='Remember me' /> */}
+                <Typography className='text-end' color='secondary' component={Link} href='/start-application'>
+                  Apply Here
+                </Typography>
                 <Typography className='text-end' color='primary' component={Link} href='/forgot-password'>
                   Forgot password?
                 </Typography>

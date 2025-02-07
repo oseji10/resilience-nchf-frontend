@@ -1,226 +1,252 @@
-// MUI Imports
-import Chip from '@mui/material/Chip'
-import { useTheme } from '@mui/material/styles'
-import dynamic from 'next/dynamic';
-import Cookies from 'js-cookie';
-// Third-party Imports
-import PerfectScrollbar from 'react-perfect-scrollbar'
+import { useEffect, useState } from "react";
+import { Menu, SubMenu, MenuItem, MenuSection } from "@/@menu/vertical-menu"; // Adjust path as needed
+import { useTheme } from "@mui/material/styles";
+import { useRouter } from "next/navigation";
+import { Box, CircularProgress, MenuItem as MUIItem, Typography } from "@mui/material"; // For MUI styling of menu items
+import Cookies from "js-cookie";
+import useVerticalNav from "@/@menu/hooks/useVerticalNav";
+import PerfectScrollbar from "react-perfect-scrollbar";
+import menuItemStyles from "@/@core/styles/vertical/menuItemStyles";
+import menuSectionStyles from "@/@core/styles/vertical/menuSectionStyles";
+import StyledVerticalNavExpandIcon from "@/@menu/styles/vertical/StyledVerticalNavExpandIcon";
 
-// Type Imports
-import type { VerticalMenuContextProps } from '@/@menu/components/vertical-menu/Menu'
-
-// Component Imports
-import { Menu, SubMenu, MenuItem, MenuSection } from '@/@menu/vertical-menu'
-
-// Hook Imports
-import useVerticalNav from '@/@menu/hooks/useVerticalNav'
-
-// Styled Component Imports
-import StyledVerticalNavExpandIcon from '@/@menu/styles/vertical/StyledVerticalNavExpandIcon'
-
-// Style Imports
-import menuItemStyles from '@/@core/styles/vertical/menuItemStyles'
-import menuSectionStyles from '@/@core/styles/vertical/menuSectionStyles'
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-type RenderExpandIconProps = {
-  open?: boolean
-  transitionDuration?: VerticalMenuContextProps['transitionDuration']
-}
-
-const RenderExpandIcon = ({ open, transitionDuration }: RenderExpandIconProps) => (
-  <StyledVerticalNavExpandIcon open={open} transitionDuration={transitionDuration}>
-    <i className='ri-arrow-right-s-line' />
-  </StyledVerticalNavExpandIcon>
-)
-const VerticalMenu = ({ scrollMenu }: { scrollMenu: (container: any, isPerfectScrollbar: boolean) => void })  => {
-  // const VerticalMenu = dynamic(() => import('./VerticalMenu'), { ssr: false });
-
-  const router = useRouter();
+const VerticalMenu = ({ filteredMenu }) => {
+  const [openSubmenu, setOpenSubmenu] = useState(null);
   const theme = useTheme();
+  const router = useRouter();
+
+  const toggleSubmenu = (index) => {
+    setOpenSubmenu(openSubmenu === index ? null : index);
+  };
+
   const { isBreakpointReached, transitionDuration } = useVerticalNav();
-  const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar;
-
-  // const [role, setRole] = useState<string | null>(null);
-
-  // useEffect(() => {
-  //   if (typeof window !== 'undefined') {
-  //     const token = localStorage.getItem('authToken');
-  //     const userRole = localStorage.getItem('role');
-  
-  //     if (!token) {
-  //       router.push('/login'); // Redirect to login if no token
-  //       return;
-  //     }
-  
-  //     setRole(userRole); // Set the role
-  //   }
-  // }, [router]);
-  // useEffect(() => {
-  //   const userRole = Cookies.get('role');
-  //   // const token = Cookies.get('authToken');
-
-  //   if (!Cookies.get('authToken')) {
-  //     router.push('/login');
-  //     // return null;
-  //   }
-  //   setRole(userRole);
-  // });
-
-  const role = Cookies.get('role');
-  // console.log(role)
-    // const token = Cookies.get('authToken');
-
-    if (!Cookies.get('authToken')) {
-      router.push('/login');
-      // return null;
-    }
-
-  // Function to check if a role can see a specific menu
-  // const canView = (allowedRoles: string[]) => role && allowedRoles.includes(role);
-  const canView = (allowedRoles: string[]) => role && (allowedRoles.includes(role) || role === '8');
+  const ScrollWrapper = isBreakpointReached ? "div" : PerfectScrollbar;
 
   return (
     <ScrollWrapper
       {...(isBreakpointReached
         ? {
-            className: 'bs-full overflow-y-auto overflow-x-hidden',
-            onScroll: container => scrollMenu(container, false),
+            className: "bs-full overflow-y-auto overflow-x-hidden",
           }
         : {
             options: { wheelPropagation: false, suppressScrollX: true },
-            onScrollY: container => scrollMenu(container, true),
           })}
     >
       <Menu
         menuItemStyles={menuItemStyles(theme)}
-        renderExpandIcon={({ open }) => <RenderExpandIcon open={open} transitionDuration={transitionDuration} />}
+        renderExpandIcon={({ open }) => (
+          <StyledVerticalNavExpandIcon open={open} transitionDuration={transitionDuration}>
+            <i className="ri-arrow-right-s-line" />
+          </StyledVerticalNavExpandIcon>
+        )}
         renderExpandedMenuItemIcon={{ icon: <i className="ri-circle-line" /> }}
         menuSectionStyles={menuSectionStyles(theme)}
       >
         <MenuSection label="Dashboard">
-          {/* Menu items based on roles */}
-          {canView(['2', '4', '6', '8', '3']) && (
-  <SubMenu label="Patients" icon={<i className="ri-user-settings-line" />}>
-    <MenuItem href="/dashboard/patients">All Patients</MenuItem>
-    {(role === '4' || role === '6' || role ==='8') && (
-      <MenuItem href="/dashboard/encounters" icon={<i className="ri-shield-keyhole-line" />}>
-        Encounters
-      </MenuItem>
-    )}
-  </SubMenu>
-)}
+          {filteredMenu.map((item, index) => (
+            <div key={index}>
+              {item.subItems && item.subItems.length > 0 ? (
+                <SubMenu
+                  label={item.label}
+                  icon={item.icon}
+                  onClick={() => toggleSubmenu(index)}
+                  open={openSubmenu === index}
+                >
+                  {openSubmenu === index &&
+                    item.subItems.map((subItem, subIndex) => (
+                      <MenuItem key={subIndex} component="a" href={subItem.href}>
+                        {subItem.icon}
+                        {subItem.label}
+                      </MenuItem>
+                    ))}
+                </SubMenu>
+              ) : (
+                <MenuItem component="a" href={item.href}>
+  <Box display="flex" alignItems="center" gap={1}>
+    {item.icon}
+    <Typography variant="body2">{item.label}</Typography>
+  </Box>
+</MenuItem>
 
-
-          {canView(['3', '4', '8']) && (
-            <MenuItem href="/dashboard/appointments" icon={<i className="ri-calendar-line" />}>
-              Appointments
-            </MenuItem>
-          )}
-
-          {canView(['7', '8']) && (
-             <SubMenu label='Users' icon={<i className='ri-group-line' />}>
-             <MenuItem href='/dashboard/users/new-user'>
-               New User
-             </MenuItem>
-             <MenuItem href='/dashboard/users'>
-               All Users
-             </MenuItem>
-           
-           </SubMenu>
-          )}
-
-
-{canView(['3', '4', '8']) && (
-            <MenuItem href="/dashboard/billings" icon={<i className="ri-shopping-cart-line" />}>
-              Billings
-            </MenuItem>
-          )}
-
-
-{canView(['7']) && (
-            <MenuItem href='/dashboard/clinic_receptionists' icon={<i className='ri-hand-heart-line' />}>
-            Clinic Receptionists
-          </MenuItem>
-)}
-
-{canView(['7']) && (
-         <MenuItem href='/dashboard/workshop_receptionists' icon={<i className='ri-table-line' />}>
-         Workshop Receptionists
-       </MenuItem>
-)}
-
-
-{canView(['7']) && (
-        <MenuItem href='/dashboard/front_desks' icon={<i className='ri-mac-line' />}>
-        Front Desk
-      </MenuItem>
-)}
-
-{canView(['7']) && (
-        <MenuItem href='/dashboard/doctors' icon={<i className='ri-stethoscope-line' />}>
-        Doctors
-      </MenuItem>
-)}
-
-{canView(['7']) && (
-      <MenuItem href='/dashboard/nurses' icon={<i className='ri-nurse-fill' />}>
-      Nurses
-    </MenuItem>
-)}
-
-
-{/* {canView(['7']) && (
-     <SubMenu label='Medicines' icon={<i className='ri-capsule-line' />}>
-     <MenuItem href='/dashboard/medicines/new-medicine'>
-       New Medicine
-     </MenuItem>
-     <MenuItem href='/dashboard/medicines'>
-       All Medicines
-     </MenuItem>
-     <MenuItem href='/dashboard/manufacturers/new-manufacturer'>
-       New Manufacturer
-     </MenuItem>
-     
-   </SubMenu>
-)} */}
-
-
-{canView(['7']) && (
-   <SubMenu label='HMOs' icon={<i className='ri-hospital-line' />}>
-     <MenuItem href='/dashboard/hmos/new-hmo'>
-       New HMO
-     </MenuItem>
-     <MenuItem href='/dashboard/hmos'>
-       All HMOs
-     </MenuItem>
-   
-   </SubMenu>
-)}
-
-
-{canView(['2', '5', '6']) && (
-            <SubMenu label="Price List" icon={<i className="ri-price-tag-3-line" />}>
-              <MenuItem href='/dashboard/products'>Products</MenuItem>
-              <MenuItem href='/dashboard/services'>Services</MenuItem>
-            </SubMenu>
-          )}
-         
-          {canView(['2', '5', '6']) && (
-            <SubMenu label="Inventory" icon={<i className="ri-stock-line" />}>
-              <MenuItem href='/dashboard/inventories/medicines'>Medicines</MenuItem>
-              {/* <MenuItem href='/dashboard/inventories/services'>Services</MenuItem> */}
-              <MenuItem href="/dashboard/inventories/lenses">Lenses</MenuItem>
-              <MenuItem href="/dashboard/inventories/frames">Frames</MenuItem>
-              <MenuItem href="/dashboard/inventories/accessories">Accessories</MenuItem>
-            </SubMenu>
-          )}
-
-      
+              )}
+            </div>
+          ))}
         </MenuSection>
       </Menu>
     </ScrollWrapper>
   );
 };
 
-export default VerticalMenu;
+const App = () => {
+  const [permissions, setPermissions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const role = Cookies.get("role");
+
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      try {
+        const token = Cookies.get('authToken');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/user-permissions?role=${role}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`, 
+          },
+          
+        });
+        const data = await response.json();
+        console.log(data);
+        setPermissions(data.permissions); // Assuming API returns `{ permissions: ["view_patients", "manage_users"] }`
+      } catch (error) {
+        console.error("Error fetching permissions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (role) {
+      fetchPermissions();
+    }
+  }, [role]);
+
+  const menuItems = [
+    {
+      label: "Apply",
+      icon: <i className="ri-pencil-fill" />,
+      href: "/dashboard/apply/biodata",
+      permission: "patient_apply",
+    },
+    {
+      label: "Track Status",
+      icon: <i className="ri-search-2-fill" />,
+      href: "/dashboard/track-status",
+      permission: "track_status",
+    },
+    {
+      label: "Billings",
+      icon: <i className="ri-shopping-bag-4-fill" />,
+      href: "/dashboard/patient-billing-history",
+      permission: "patient_billing_history",
+    },
+    // {
+    //   label: "Patients",
+    //   icon: <i className="ri-user-settings-line" />,
+    //   permission: "view_patients",
+    //   subItems: [
+    //     { label: "All Patients", href: "/dashboard/patients" },
+    //     { label: "New Patient", href: "/dashboard/patients/new-patient" },
+    //   ],
+    // },
+
+
+// Super Admin
+
+{
+  label: "Patients",
+  icon: <i className="ri-wheelchair-fill" />,
+  href: "/dashboard/patients",
+  permission: "view_all_hospitals",
+},
+
+    {
+      label: "Hospitals",
+      icon: <i className="ri-hospital-fill" />,
+      href: "/dashboard/hospitals",
+      permission: "view_all_hospitals",
+    },
+
+    {
+      label: "Manage Users",
+      icon: <i className="ri-group-fill" />,
+      href: "/dashboard/users/hospital-admins",
+      permission: "manage_hospital_admins",
+    },
+
+
+    {
+      label: "Appointments",
+      icon: <i className="ri-calendar-line" />,
+      href: "/dashboard/appointments",
+      permission: "manage_appointments",
+    },
+
+
+
+    // Hospital Admins
+    {
+      label: "Patients",
+      icon: <i className="ri-wheelchair-fill" />,
+      href: "/dashboard/patients",
+      permission: "hospital_admin_manage_hospital_patients",
+    },
+
+    {
+      label: "Billings",
+      icon: <i className="ri-shopping-bag-4-fill" />,
+      href: "/dashboard/patient-billing-history",
+      permission: "hospital_admin_view_patients_billings",
+    },
+
+    {
+      label: "Manage Users",
+      icon: <i className="ri-group-fill" />,
+      href: "/dashboard/users/hospital-staff",
+      permission: "manage_hospital_staff",
+    },
+
+    // {
+    //   label: "Users",
+    //   icon: <i className="ri-group-fill" />,
+    //   permission: "super_admin_create_new_user",
+    //   href: "/dashboard/users",
+    //   subItems: [
+    //     { label: "Hospital Admins", href: "/dashboard/users/hospital-admins", permission: "manage_hospital_admins" },
+    //     { label: "CMDs", href: "/dashboard/users/cmds", permission: "manage_cmds" },
+    //     { label: "Other Users", href: "/dashboard/users", permission: "manage_other_users" },
+    //   ],
+    // },
+
+    
+
+    {
+      label: "Billings",
+      icon: <i className="ri-shopping-cart-line" />,
+      href: "/dashboard/billings",
+      permission: "view_billings",
+    },
+    {
+      label: "Inventory",
+      icon: <i className="ri-stock-line" />,
+      permission: "access_inventory",
+      subItems: [
+        { label: "Medicines", href: "/dashboard/inventories/medicines" },
+        { label: "Lenses", href: "/dashboard/inventories/lenses" },
+        { label: "Frames", href: "/dashboard/inventories/frames" },
+        { label: "Accessories", href: "/dashboard/inventories/accessories" },
+      ],
+    },
+  ];
+
+  const hasPermission = (permissionSlug) => !permissionSlug || permissions.includes(permissionSlug);
+
+  const filteredMenu = menuItems
+    .filter((item) => hasPermission(item.permission))
+    .map((item) => ({
+      ...item,
+      subItems: item.subItems?.filter((subItem) => hasPermission(subItem.permission)) || [],
+    }));
+
+  if (loading) return <Typography>
+  <Box display="flex" justifyContent="center" alignItems="center">
+    <CircularProgress size={20} />
+  </Box>
+</Typography>;;
+
+  return (
+    <div>
+      <VerticalMenu filteredMenu={filteredMenu} />
+    </div>
+  );
+};
+
+export default App;

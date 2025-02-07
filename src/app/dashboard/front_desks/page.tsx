@@ -5,7 +5,7 @@ import type { ReactElement } from 'react'
 import dynamic from 'next/dynamic'
 
 // Component Imports
-import Patients from '@/views/patients'
+import Patients from '@/views/nicrat-patients'
 import Front_desks from '@/views/front_desks/all-front_desks/AllFront_desks'
 
 
