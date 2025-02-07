@@ -35,11 +35,8 @@ const phoneNumber = Cookies.get("phoneNumber");
     hospitalFileNumber: '',
     hospital: '',
     stateOfOrigin: '',
-    lgaOfOrigin: '',
     stateOfResidence: '',
-    lgaOfResidence: '',
-    
-    bloodgroup: '',
+    bloodGroup: '',
     occupation: '',
     dateOfBirth: '',
     address: '',
@@ -55,7 +52,7 @@ const phoneNumber = Cookies.get("phoneNumber");
   })
   const [loading, setLoading] = useState(false)
   const [hospitals, setHospitals] = useState([])
-  const [cancerTypes, setCancerTypes] = useState([])
+  const [cancers, setCancers] = useState([])
   const [states, setStates] = useState([])
   const [lgas, setLgas] = useState([])
   const [step, setStep] = useState(1)
@@ -63,20 +60,45 @@ const phoneNumber = Cookies.get("phoneNumber");
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [hospitalsRes, cancerRes, statesRes] = await Promise.all([
-          axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/hospitals`),
-          axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/cancer_types`),
-          axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/states`)
-        ])
-        setHospitals(hospitalsRes.data)
-        setCancerTypes(cancerRes.data)
-        setStates(statesRes.data)
+        const token = Cookies.get("authToken");
+  
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+  
+        const responses = await Promise.allSettled([
+          axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/hospitals`, config),
+          axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/cancers`, config),
+          axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/states`, config),
+        ]);
+  
+        if (responses[0].status === "fulfilled") {
+          setHospitals(responses[0].value.data);
+        } else {
+          console.error("Failed to fetch hospitals:", responses[0].reason);
+        }
+  
+        if (responses[1].status === "fulfilled") {
+          setCancers(responses[1].value.data);
+        } else {
+          console.error("Failed to fetch cancer types:", responses[1].reason);
+        }
+  
+        if (responses[2].status === "fulfilled") {
+          setStates(responses[2].value.data);
+        } else {
+          console.error("Failed to fetch states:", responses[2].reason);
+        }
       } catch (error) {
-        console.error('Error fetching data:', error)
+        console.error("Unexpected error:", error);
       }
-    }
-    fetchData()
-  }, [])
+    };
+  
+    fetchData();
+  }, []);
+   
 
   useEffect(() => {
     if (formData.stateOfResidence) {
@@ -127,10 +149,17 @@ const phoneNumber = Cookies.get("phoneNumber");
                 </Grid>
                 <Grid item xs={12} sm={6}><TextField type='number' fullWidth label="NIN" value={formData.NIN} onChange={(e) => handleFormChange('NIN', e.target.value)} /></Grid>
                 <Grid item xs={12} sm={6}><TextField fullWidth label="Phone Number" value={phoneNumber} onChange={(e) => handleFormChange('phoneNumber', e.target.value)} InputLabelProps={{ shrink: !!phoneNumber }} aria-readonly/></Grid>
-                <Grid item xs={12} sm={6}><TextField fullWidth label="First Name" value={firstName} onChange={(e) => handleFormChange('firstName', e.target.value)}     InputLabelProps={{ shrink: !!firstName }} aria-readonly/></Grid>
-                <Grid item xs={12} sm={6}><TextField fullWidth label="Last Name" value={lastName} onChange={(e) => handleFormChange('lastName', e.target.value)}    InputLabelProps={{ shrink: !!lastName }} aria-readonly/></Grid>
-                <Grid item xs={12} sm={6}><TextField fullWidth label="Other Names" value={otherNames} onChange={(e) => handleFormChange('otherNames', e.target.value)}     InputLabelProps={{ shrink: !!otherNames }} aria-readonly/></Grid>
+                <Grid item xs={12} sm={4}><TextField fullWidth label="First Name" value={firstName} onChange={(e) => handleFormChange('firstName', e.target.value)}     InputLabelProps={{ shrink: !!firstName }} aria-readonly/></Grid>
+                <Grid item xs={12} sm={4}><TextField fullWidth label="Last Name" value={lastName} onChange={(e) => handleFormChange('lastName', e.target.value)}    InputLabelProps={{ shrink: !!lastName }} aria-readonly/></Grid>
+                <Grid item xs={12} sm={4}><TextField fullWidth label="Other Names" value={otherNames} onChange={(e) => handleFormChange('otherNames', e.target.value)}     InputLabelProps={{ shrink: !!otherNames }} aria-readonly/></Grid>
                 <Grid item xs={12} sm={6}><FormControl fullWidth><InputLabel>Gender</InputLabel><Select value={formData.gender} onChange={(e) => handleFormChange('gender', e.target.value)}><MenuItem value="Male">Male</MenuItem><MenuItem value="Female">Female</MenuItem></Select></FormControl></Grid>
+                {/* <Grid item xs={12} sm={6}><FormControl fullWidth><InputLabel>Hospital</InputLabel><Select value={formData.hospital} onChange={(e) => handleFormChange('hospital', e.target.value)}>{hospitals.map(hospital => <MenuItem key={hospital.id} value={hospital.id}>{hospital.name}</MenuItem>)}</Select></FormControl></Grid> */}
+                <Grid item xs={12} sm={6}><TextField select label="Which Hospital are you currently receiving care?" name="hospital" value={formData.hospital} onChange={(e) => handleFormChange('hospital', e.target.value)} fullWidth> {hospitals.map((hospital) => (<MenuItem key={hospital.hospitalId} value={hospital.hospitalId}>{hospital.hospitalName}</MenuItem>))}</TextField></Grid>
+                <Grid item xs={12} sm={6}><TextField fullWidth label="Enter your hospital File Number" value={formData.hospitalFileNumber} onChange={(e) => handleFormChange('hospitalFileNumber', e.target.value)} /></Grid>
+                <Grid item xs={12} sm={6}><TextField select label="What type of cancer have you been diagnosed of?" name="cancerType" value={formData.cancerType} onChange={(e) => handleFormChange('cancerType', e.target.value)} fullWidth> {cancers.map((cancer) => (<MenuItem key={cancer.cancerId} value={cancer.cancerId}>{cancer.cancerName}</MenuItem>))}</TextField></Grid>
+                <Grid item xs={12} sm={6}><TextField select label="Which state are you from?" name="stateOfOrigin" value={formData.stateOfOrigin} onChange={(e) => handleFormChange('stateOfOrigin', e.target.value)} fullWidth> {states.map((state) => (<MenuItem key={state.stateId} value={state.stateId}>{state.stateName}</MenuItem>))}</TextField></Grid>
+                <Grid item xs={12} sm={6}><TextField select label="Which state do you currently reside?" name="stateOfResidence" value={formData.stateOfResidence} onChange={(e) => handleFormChange('stateOfResidence', e.target.value)} fullWidth> {states.map((state) => (<MenuItem key={state.stateId} value={state.stateId}>{state.stateName}</MenuItem>))}</TextField></Grid>
+                {/* <Grid item xs={12} sm={6}><FormControl fullWidth><InputLabel>Cancer Type</InputLabel><Select value={formData.cancerType} onChange={(e) => handleFormChange('cancerType', e.target.value)}>{cancerTypes.map(cancer => <MenuItem key={cancer.id} value={cancer.cancerId}>{cancer.canecerName}</MenuItem>)}</Select></FormControl></Grid> */}
               </>
             )}
             {step === 2 && (
@@ -140,14 +169,14 @@ const phoneNumber = Cookies.get("phoneNumber");
                     Hospital Details
                   </Typography>
                 </Grid>
-              <Grid item xs={12} sm={6}><FormControl fullWidth><InputLabel>Hospital</InputLabel><Select value={formData.hospital} onChange={(e) => handleFormChange('hospital', e.target.value)}>{hospitals.map(hospital => <MenuItem key={hospital.id} value={hospital.id}>{hospital.name}</MenuItem>)}</Select></FormControl></Grid>
-                <Grid item xs={12} sm={6}><TextField fullWidth label="Hospital File Number" value={formData.hospitalFileNumber} onChange={(e) => handleFormChange('hospitalFileNumber', e.target.value)} /></Grid>
+              {/* <Grid item xs={12} sm={6}><FormControl fullWidth><InputLabel>Hospital</InputLabel><Select value={formData.hospital} onChange={(e) => handleFormChange('hospital', e.target.value)}>{hospitals.map(hospital => <MenuItem key={hospital.id} value={hospital.id}>{hospital.name}</MenuItem>)}</Select></FormControl></Grid>
+                <Grid item xs={12} sm={6}><TextField fullWidth label="Hospital File Number" value={formData.hospitalFileNumber} onChange={(e) => handleFormChange('hospitalFileNumber', e.target.value)} /></Grid> */}
               </>
             )}
             {step === 3 && (
               <> 
-                <Grid item xs={12} sm={6}><FormControl fullWidth><InputLabel>Hospital</InputLabel><Select value={formData.hospital} onChange={(e) => handleFormChange('hospital', e.target.value)}>{hospitals.map(hospital => <MenuItem key={hospital.id} value={hospital.id}>{hospital.name}</MenuItem>)}</Select></FormControl></Grid>
-                <Grid item xs={12} sm={6}><FormControl fullWidth><InputLabel>Cancer Type</InputLabel><Select value={formData.cancerType} onChange={(e) => handleFormChange('cancerType', e.target.value)}>{cancerTypes.map(cancer => <MenuItem key={cancer.id} value={cancer.id}>{cancer.name}</MenuItem>)}</Select></FormControl></Grid>
+                {/* <Grid item xs={12} sm={6}><FormControl fullWidth><InputLabel>Hospital</InputLabel><Select value={formData.hospital} onChange={(e) => handleFormChange('hospital', e.target.value)}>{hospitals.map(hospital => <MenuItem key={hospital.id} value={hospital.id}>{hospital.name}</MenuItem>)}</Select></FormControl></Grid>
+                <Grid item xs={12} sm={6}><FormControl fullWidth><InputLabel>Cancer Type</InputLabel><Select value={formData.cancerType} onChange={(e) => handleFormChange('cancerType', e.target.value)}>{cancerTypes.map(cancer => <MenuItem key={cancer.id} value={cancer.id}>{cancer.name}</MenuItem>)}</Select></FormControl></Grid> */}
               </>
             )}
           </Grid>
