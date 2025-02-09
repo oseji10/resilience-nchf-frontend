@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic'
 
 // Component Imports
 
-import HospitalPatientsTable from '@/views/users/hospital-admins/HospitalPatients'
+import HospitalPatientsTable from '@/views/users/hospital-admin/HospitalPatients'
 
 
 

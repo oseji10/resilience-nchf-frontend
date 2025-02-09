@@ -1,5 +1,5 @@
 // React Imports
-import type { ReactElement } from 'react'
+import { Suspense, type ReactElement } from 'react'
 
 // Next Imports
 import dynamic from 'next/dynamic'
@@ -10,7 +10,12 @@ import SuccessPage from '@/views/apply/create/SuccessPage'
 
 
 const Success = () => {
-  return <SuccessPage />
+  // return <SuccessPage />
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SuccessPage />
+    </Suspense>
+  );
 }
 
 export default Success

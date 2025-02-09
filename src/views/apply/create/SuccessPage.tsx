@@ -42,7 +42,7 @@ const SuccessPage = () => {
 </Typography>
 
         <Typography variant="h6" gutterBottom>
-          Your application has been received. We will be reviewing it shortly. To track your application status, always login and click on <b><a href='/dashboard/track-status'>Track Staus</a></b>
+          Your application has been received. We will be reviewing it shortly. However, you need to take a step further. Please visit the CHF Desk Officer at the Hopital you selcted for treatment so they can assign you a doctor. This step is critical to having your application reviewed. To track your application status, always login and click on <b><a href='/dashboard/apply/track-status'>Track Status</a></b>
         </Typography>
       </CardContent>
     </Card>

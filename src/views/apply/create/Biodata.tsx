@@ -132,7 +132,7 @@ runningWater: "",
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (step === 5) {
+    if (step === 6) {
       handleNextStep();
     } else {
       nextStep();
@@ -161,7 +161,7 @@ runningWater: "",
       return;
     }
   
-    if (step === 5) {
+    if (step === 6) {
       setLoading(true);
       const token = Cookies.get("authToken");
   
@@ -749,7 +749,7 @@ runningWater: "",
   onClick={handleNextStep}
   disabled={loading}
 >
-  {loading ? <CircularProgress size={24} color="inherit" /> : step === 5 ? "Next" : "Submit"}
+  {loading ? <CircularProgress size={24} color="inherit" /> : step === 6 ? "Submit" : "Next"}
 </Button>
 
 

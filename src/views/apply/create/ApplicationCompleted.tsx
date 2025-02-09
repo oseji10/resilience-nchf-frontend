@@ -42,7 +42,7 @@ const ApplicationCompleted = () => {
 </Typography>
 
         <Typography variant="h6" gutterBottom>
-          You have already filled the application form and we are currently reviewing it. To track your application status, always login and click on <b><a href='/dashboard/track-status'>Track Staus</a></b>
+          You have already filled the application form and we are currently reviewing it. To track your application status, always login and click on <b><a href='/dashboard/apply/track-status'>Track Status</a></b>
         </Typography>
       </CardContent>
     </Card>

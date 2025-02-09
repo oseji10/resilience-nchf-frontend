@@ -14,5 +14,9 @@
   
   body {
     font-family: 'Inter', sans-serif;
+    
+  }
+  .swal2-front {
+    z-index: 2000 !important; /* Make sure it's above the MUI modal */
   }
   

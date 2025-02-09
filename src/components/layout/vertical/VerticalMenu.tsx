@@ -135,7 +135,7 @@ const App = () => {
     {
       label: "My Patients",
       icon: <i className="ri-group-fill" />,
-      href: "/dashboard/doctor/patients",
+      href: "/dashboard/users/doctor/patients",
       permission: "doctor_manage_patients",
     },
     {
@@ -207,7 +207,7 @@ const App = () => {
     {
       label: "Patients",
       icon: <i className="ri-wheelchair-fill" />,
-      href: "/dashboard/users/hospital-admins/patients",
+      href: "/dashboard/users/hospital-admin/patients",
       permission: "hospital_admin_manage_hospital_patients",
     },
 
