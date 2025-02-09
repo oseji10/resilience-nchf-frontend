@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // Next Imports
 import Link from 'next/link'
@@ -12,23 +12,45 @@ import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import InputLabel from '@mui/material/InputLabel'
+import FormControl from '@mui/material/FormControl'
+import Grid from '@mui/material/Grid'
 
 // SweetAlert2 Import
 import Swal from 'sweetalert2'
+import Logo from '@/@core/svg/Logo'
 
 // Register Component
 const Register = () => {
   // Form state
-  const [formData, setFormData] = useState(
-    {
+  const [formData, setFormData] = useState({
     phoneNumber: '',
     email: '',
     firstName: '',
     lastName: '',
     otherNames: '',
+    languageId: '',
   })
 
   const [loading, setLoading] = useState(false)
+  const [languages, setLanguages] = useState([])
+
+  // Fetch languages on component mount
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/languages`)
+        const data = await response.json()
+        setLanguages(data)
+      } catch (error) {
+        console.error('Error fetching languages:', error)
+      }
+    }
+
+    fetchLanguages()
+  }, [])
 
   // Handle input changes
   const handleChange = (e) => {
@@ -37,82 +59,114 @@ const Register = () => {
 
   // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-  
+    e.preventDefault()
+    setLoading(true)
+
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/users`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/sign-up`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
-      });
-  
-      const result = await response.json();
-  
+      })
+
+      const result = await response.json()
+
       if (response.ok) {
         Swal.fire({
           icon: 'success',
           title: 'Successful!',
           text: 'Your data has been submitted successfully. Please check your phone or email for further instructions.',
-        });
-        setFormData({ phoneNumber: '', email: '', firstName: '', lastName: '', otherNames: '' });
+        })
+
+        setFormData({ phoneNumber: '', email: '', firstName: '', lastName: '', otherNames: '', languageId: '' })
       } else {
-        let errorMessage = result.message || 'Something went wrong. Please try again.';
-  
-        // Handle validation errors
+        let errorMessage = result.message || 'Something went wrong. Please try again.'
+
         if (result.errors) {
           if (result.errors.email) {
-            errorMessage = result.errors.email[0]; // "The email has already been taken."
+            errorMessage = result.errors.email[0]
           } else if (result.errors.phoneNumber) {
-            errorMessage = result.errors.phoneNumber[0]; // "The phone number has already been taken."
+            errorMessage = result.errors.phoneNumber[0]
           }
         }
-  
+
         Swal.fire({
           icon: 'error',
           title: 'Registration Failed!',
           text: errorMessage,
-        });
+        })
       }
     } catch (error) {
       Swal.fire({
         icon: 'error',
         title: 'Error!',
         text: error.message,
-      });
+      })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
-  
+  }
+
   return (
-    <div className='flex flex-col justify-center items-center min-bs-[100dvh] relative p-6'>
-      <Card className='flex flex-col sm:is-[450px]'>
-        <CardContent className='p-6 sm:!p-12'>
-          <Link href='/about' className='flex justify-center items-start mbe-6'>
-            <Typography variant='h5'>CHF Application starts here 🚀</Typography>
-          </Link>
-          <div className='flex flex-col gap-5'>
-            <Typography className='mbs-1'>Fill in this form to start the process</Typography>
-            <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
-              <TextField name='phoneNumber' label='Phone Number' fullWidth required value={formData.phoneNumber} onChange={handleChange} />
-              <TextField name='email' label='Email (Optional)' fullWidth value={formData.email} onChange={handleChange} />
-              <TextField name='firstName' label='First Name' fullWidth required value={formData.firstName} onChange={handleChange} />
-              <TextField name='lastName' label='Last Name' fullWidth required value={formData.lastName} onChange={handleChange} />
-              <TextField name='otherNames' label='Other Names (Optional)' fullWidth value={formData.otherNames} onChange={handleChange} />
+    <div className='flex flex-col justify-center items-center min-h-screen p-6 bg-gray-50'>
+      <Card className='shadow-lg w-full max-w-lg rounded-lg'>
+        <CardContent className='p-8'>
+          {/* Logo Section */}
+          {/* <div className='flex justify-center mb-6'> */}
+          <Link href='/' className='flex justify-center items-center'>
+  <Logo style={{ width: '100px', height: '50px !important' }} />
+</Link>
 
-              <Button fullWidth variant='contained' type='submit' disabled={loading}>
-                {loading ? 'Submitting...' : 'Start Application'}
-              </Button>
+          {/* </div> */}
 
-              <div className='flex justify-center items-center flex-wrap gap-2'>
-                <Typography>Already have an account?</Typography>
-                <Typography component={Link} href='/login' color='primary'>
-                  Sign in instead
-                </Typography>
-              </div>
-            </form>
-          </div>
+          {/* Title */}
+          <Typography variant='h6' className='text-center font-semibold text-gray-800 mb-2'>
+            Your Cancer Health Fund application starts here 🚀
+          </Typography>
+          <Typography className='text-center text-gray-600 mb-6'>Fill in this form to start the process</Typography>
+
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField name='phoneNumber' label='Phone Number' fullWidth required value={formData.phoneNumber} onChange={handleChange} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField name='email' label='Email (Optional)' fullWidth value={formData.email} onChange={handleChange} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField name='firstName' label='First Name' fullWidth required value={formData.firstName} onChange={handleChange} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField name='lastName' label='Last Name' fullWidth required value={formData.lastName} onChange={handleChange} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField name='otherNames' label='Other Names (Optional)' fullWidth value={formData.otherNames} onChange={handleChange} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Preferred Language</InputLabel>
+                  <Select name='languageId' value={formData.languageId} onChange={handleChange} required>
+                    {languages.map((language) => (
+                      <MenuItem key={language.languageId} value={language.languageId}>
+                        {language.languageName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+
+            <Button fullWidth variant='contained'  type='submit' disabled={loading} className='mt-4'>
+              {loading ? 'Submitting...' : 'Start Application'}
+            </Button>
+
+            <div className='flex justify-center items-center flex-wrap gap-2 mt-4'>
+              <Typography>Already have an account?</Typography>
+              <Typography component={Link} href='/login' color='primary' className='font-semibold'>
+                Sign in instead
+              </Typography>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

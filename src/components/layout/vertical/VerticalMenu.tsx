@@ -21,6 +21,8 @@ const VerticalMenu = ({ filteredMenu }) => {
 
   const { isBreakpointReached, transitionDuration } = useVerticalNav();
   const ScrollWrapper = isBreakpointReached ? "div" : PerfectScrollbar;
+  // const ScrollWrapper = isBreakpointReached && window.innerWidth <= 768 ? "div" : PerfectScrollbar;
+
 
   return (
     <ScrollWrapper
@@ -119,7 +121,7 @@ const App = () => {
     {
       label: "Track Status",
       icon: <i className="ri-search-2-fill" />,
-      href: "/dashboard/track-status",
+      href: "/dashboard/apply/track-status",
       permission: "track_status",
     },
     {
@@ -128,6 +130,35 @@ const App = () => {
       href: "/dashboard/patient-billing-history",
       permission: "patient_billing_history",
     },
+
+// Doctor Roles
+    {
+      label: "My Patients",
+      icon: <i className="ri-group-fill" />,
+      href: "/dashboard/doctor/patients",
+      permission: "doctor_manage_patients",
+    },
+    {
+      label: "Patient Billings",
+      icon: <i className="ri-shopping-bag-4-fill" />,
+      href: "/dashboard/doctor/patient/billings",
+      permission: "doctor_manage_billings",
+    },
+    {
+      label: "Prescriptions",
+      icon: <i className="ri-capsule-fill"></i>,
+      href: "/dashboard/patient-billing-history",
+      permission: "doctor_manage_prescriptions",
+    },
+
+    {
+      label: "Transfer/Referral",
+      icon: <i className="ri-arrow-left-right-fill" />,
+      href: "/dashboard/patient-billing-history",
+      permission: "doctor_manage_transfers",
+    },
+
+    
     // {
     //   label: "Patients",
     //   icon: <i className="ri-user-settings-line" />,
@@ -176,7 +207,7 @@ const App = () => {
     {
       label: "Patients",
       icon: <i className="ri-wheelchair-fill" />,
-      href: "/dashboard/patients",
+      href: "/dashboard/users/hospital-admins/patients",
       permission: "hospital_admin_manage_hospital_patients",
     },
 

@@ -1,13 +1,19 @@
+// React Imports
+import type { ReactElement } from 'react'
 
-'use client';
+// Next Imports
+import dynamic from 'next/dynamic'
 
-import Biodata from '@/views/apply/create/Biodata';
 
-import { Suspense } from 'react';
 
-// const EncountersPage = () => {
-  const EncountersPage = () => {
-    return <Biodata />
-  }
+
+
+import Biodata from '@/views/apply/create/Biodata'
+
+
+
+const EncountersPage = () => {
+  return <Biodata />
+}
 
 export default EncountersPage
