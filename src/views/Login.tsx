@@ -20,6 +20,10 @@ import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import CircularProgress from '@mui/material/CircularProgress'
 
+import Alert from '@mui/material/Alert'
+import Collapse from '@mui/material/Collapse'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import ErrorIcon from '@mui/icons-material/Error'
 // Component Imports
 import Logo from '@/components/layout/shared/Logo'
 
@@ -112,8 +116,31 @@ const Login = () => {
               <Typography variant='h5'>{`This is the National Cancer Health Fund Portal!👋🏻`}</Typography>
               <Typography className='mbs-1'>Please sign-in to your account with your email or phone number and password</Typography>
             </div>
-            {errorMessage && <Typography color='error'>{errorMessage}</Typography>}
-            {successMessage && <Typography color='primary'>{successMessage}</Typography>}
+            {/* {errorMessage && <Typography color='error'>{errorMessage}</Typography>}
+            {successMessage && <Typography color='primary'>{successMessage}</Typography>} */}
+
+{/* Success Message */}
+<Collapse in={!!successMessage}>
+  <Alert 
+    severity="success" 
+    icon={<CheckCircleIcon fontSize="inherit" />} 
+    className="mb-3 animate-fade-in"
+  >
+    {successMessage}
+  </Alert>
+</Collapse>
+
+{/* Error Message */}
+<Collapse in={!!errorMessage}>
+  <Alert 
+    severity="error" 
+    icon={<ErrorIcon fontSize="inherit" />} 
+    className="mb-3 animate-fade-in"
+  >
+    {errorMessage}
+  </Alert>
+</Collapse>
+
             <form noValidate autoComplete='off' onSubmit={handleLogin} className='flex flex-col gap-5'>
               <TextField 
                 autoFocus 

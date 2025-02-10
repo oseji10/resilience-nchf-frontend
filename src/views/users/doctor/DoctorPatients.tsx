@@ -48,6 +48,22 @@ const DoctorPatientsTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+
+  const [openPatientDetailsModal, setOpenPatientDetailsModal] = useState(false);
+const [selectedPatientDetails, setSelectedPatientDetails] = useState(null);
+
+// Function to open patient details modal
+const handleOpenPatientDetailsModal = (patient) => {
+  setSelectedPatientDetails(patient);
+  setOpenPatientDetailsModal(true);
+};
+
+// Function to close patient details modal
+const handleClosePatientDetailsModal = () => {
+  setOpenPatientDetailsModal(false);
+  setSelectedPatientDetails(null);
+};
+
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -206,10 +222,16 @@ const DoctorPatientsTable = () => {
                   <TableCell>{patient.cancer?.cancerName || 'N/A'}</TableCell>
                   <TableCell>{patient.status?.status_details?.label || 'N/A'}</TableCell>
                   <TableCell>
-                    <IconButton onClick={() => handleOpenAssignDoctorModal(patient)} color="primary">
-                      <Edit />
-                    </IconButton>
-                  </TableCell>
+                  <IconButton onClick={() => handleOpenPatientDetailsModal(patient)} color="primary">
+    <Visibility />
+  </IconButton>
+  {!patient.status.statusId === 3 && (
+    <IconButton onClick={() => handleOpenAssignDoctorModal(patient)} color="primary">
+      <Edit />
+    </IconButton>
+  )}
+</TableCell>
+
                 </TableRow>
               ))}
             </TableBody>
@@ -229,7 +251,7 @@ const DoctorPatientsTable = () => {
       <Dialog open={openAssignDoctorModal} onClose={handleCloseAssignDoctorModal}>
         <DialogTitle>Assign Care Plan</DialogTitle>
         <DialogContent>
-          <TextField label="Care Plan" fullWidth value={carePlan} onChange={(e) => setCarePlan(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField multiline rows={4}  label="Care Plan" fullWidth value={carePlan} onChange={(e) => setCarePlan(e.target.value)} style={{ marginBottom: '10px' }} />
           <TextField label="Amount Recommended" fullWidth type="number" value={amountRecommended} onChange={(e) => setAmountRecommended(e.target.value)} style={{ marginBottom: '10px' }} />
           <FormControlLabel control={<Checkbox checked={approved} onChange={(e) => setApproved(e.target.checked)} />} label="By clicking on this checkbox I recommend this patient for funding." />
         </DialogContent>
@@ -239,6 +261,57 @@ const DoctorPatientsTable = () => {
           <Button variant="contained" color="error" onClick={handleDisapproveCarePlan} disabled={assigning}>Disapprove</Button>
         </DialogActions>
       </Dialog>
+
+{/* Patient Details Modal */}
+<Dialog open={openPatientDetailsModal} onClose={handleClosePatientDetailsModal} maxWidth="md" fullWidth>
+  <DialogTitle>Patient Details</DialogTitle>
+  <DialogContent>
+    {selectedPatientDetails && (
+      <Box>
+        <Typography variant="h6">Personal Information</Typography>
+        <Table>
+          <TableBody>
+            <TableRow>
+              <TableCell><strong>Name:</strong></TableCell>
+              <TableCell>{selectedPatientDetails.user.firstName} {selectedPatientDetails.user.lastName}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>CHF ID:</strong></TableCell>
+              <TableCell>{selectedPatientDetails.chfId}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Diagnosis:</strong></TableCell>
+              <TableCell>{selectedPatientDetails.cancer?.cancerName || 'N/A'}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Status:</strong></TableCell>
+              <TableCell>{selectedPatientDetails.status?.status_details?.label || 'N/A'}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+
+        <Typography variant="h6" sx={{ mt: 2 }}>Care Plan</Typography>
+        <Table>
+          <TableBody>
+            <TableRow>
+              <TableCell><strong>Plan:</strong></TableCell>
+              <TableCell>{selectedPatientDetails.carePlan || 'No care plan assigned'}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Amount Recommended:</strong></TableCell>
+              <TableCell>{selectedPatientDetails.amountRecommended || 'N/A'}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </Box>
+    )}
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleClosePatientDetailsModal}>Close</Button>
+  </DialogActions>
+</Dialog>
+
+
     </Box>
   );
 };

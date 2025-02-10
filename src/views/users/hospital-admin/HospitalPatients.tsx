@@ -41,7 +41,9 @@ const HospitalPatientsTable = () => {
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [assigning, setAssigning] = useState(false);
+  // const [assigning, setAssigning] = useState(false);
+  const [assigning, setAssigning] = useState<{ [key: string]: boolean }>({});
+
   const [error, setError] = useState<string | null>(null);
   const [openAssignDoctorModal, setOpenAssignDoctorModal] = useState(false);
   const [doctors, setDoctors] = useState([]); // Store doctors
@@ -112,17 +114,22 @@ const HospitalPatientsTable = () => {
       return;
     }
   
+    // Ensure selectedPatient is valid before proceeding
+    if (!selectedPatient || !selectedPatient.patientId) {
+      Swal.fire('Error!', 'No patient selected.', 'error');
+      return;
+    }
+  
+    const patientId = selectedPatient.patientId;
+  
     // Set assigning state only for the selected patient
-    setAssigning((prev) => ({ ...prev, [selectedPatient.patientId]: true }));
+    setAssigning((prev) => ({ ...prev, [patientId]: true }));
   
     try {
       const token = Cookies.get('authToken');
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/assign`,
-        {
-          patientId: selectedPatient.patientId,
-          doctorId: selectedDoctor,
-        },
+        { patientId, doctorId: selectedDoctor },
         { headers: { Authorization: `Bearer ${token}` } }
       );
   
@@ -135,10 +142,12 @@ const HospitalPatientsTable = () => {
       Swal.fire('Oops!', 'An error occurred.', 'error');
     } finally {
       // Reset assigning state for the specific patient
-      setAssigning((prev) => ({ ...prev, [selectedPatient.patientId]: false }));
+      setAssigning((prev) => ({ ...prev, [patientId]: false }));
       handleCloseAssignDoctorModal();
     }
   };
+  
+  
   
   return (
     <Box>
@@ -224,10 +233,20 @@ const HospitalPatientsTable = () => {
           {/* <Button onClick={handleDoctorAssign} color="primary" variant="contained">
             Assign
           </Button> */}
-          <Button variant="contained" color="primary" onClick={handleDoctorAssign} disabled={assigning}>
+          {/* <Button variant="contained" color="primary" onClick={handleDoctorAssign} disabled={assigning}>
                         
                         {assigning ? <CircularProgress size={24} color="inherit" /> : "Assign"}
-                      </Button>
+                      </Button> */}
+
+                      <Button
+  variant="contained"
+  color="primary"
+  onClick={handleDoctorAssign}
+  disabled={assigning[selectedPatient?.patientId]}
+>
+  {assigning[selectedPatient?.patientId] ? <CircularProgress size={24} color="inherit" /> : "Assign"}
+</Button>
+
         </DialogActions>
       </Dialog>
     </Box>

@@ -48,6 +48,22 @@ const DoctorReviewedPatientsTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+
+  const [openPatientDetailsModal, setOpenPatientDetailsModal] = useState(false);
+  const [selectedPatientDetails, setSelectedPatientDetails] = useState(null);
+  
+  // Function to open patient details modal
+  const handleOpenPatientDetailsModal = (patient) => {
+    setSelectedPatientDetails(patient);
+    setOpenPatientDetailsModal(true);
+  };
+  
+  // Function to close patient details modal
+  const handleClosePatientDetailsModal = () => {
+    setOpenPatientDetailsModal(false);
+    setSelectedPatientDetails(null);
+  };
+
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -195,7 +211,7 @@ const DoctorReviewedPatientsTable = () => {
                 <TableCell>Patient Name</TableCell>
                 <TableCell>Diagnosis</TableCell>
                 <TableCell>Status</TableCell>
-                {/* <TableCell>Actions</TableCell> */}
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -204,12 +220,21 @@ const DoctorReviewedPatientsTable = () => {
                   <TableCell>{patient.chfId}</TableCell>
                   <TableCell>{patient.user.firstName} {patient.user.lastName}</TableCell>
                   <TableCell>{patient.cancer?.cancerName || 'N/A'}</TableCell>
-                  <TableCell>Reviewed</TableCell>
-                  {/* <TableCell>
-                    <IconButton onClick={() => handleOpenAssignDoctorModal(patient)} color="primary">
+                  <TableCell>
+  <Box sx={{ display: 'inline-block', px: 1, py: 0.5, borderRadius: 1, backgroundColor: 'success.light', color: 'success.contrastText' }}>
+    REVIEWED
+  </Box>
+</TableCell>
+
+
+                  <TableCell>
+                    <IconButton onClick={() => handleOpenPatientDetailsModal(patient)} color="primary">
+                        <Visibility />
+                      </IconButton>
+                    {/* <IconButton onClick={() => handleOpenAssignDoctorModal(patient)} color="primary">
                       <Edit />
-                    </IconButton>
-                  </TableCell> */}
+                    </IconButton> */}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -239,6 +264,58 @@ const DoctorReviewedPatientsTable = () => {
           <Button variant="contained" color="error" onClick={handleDisapproveCarePlan} disabled={assigning}>Disapprove</Button>
         </DialogActions>
       </Dialog>
+
+
+      
+      {/* Patient Details Modal */}
+      <Dialog open={openPatientDetailsModal} onClose={handleClosePatientDetailsModal} maxWidth="md" fullWidth>
+        <DialogTitle>Patient Details</DialogTitle>
+        <DialogContent>
+          {selectedPatientDetails && (
+            <Box>
+              <Typography variant="h6">Personal Information</Typography>
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell><strong>Name:</strong></TableCell>
+                    <TableCell>{selectedPatientDetails.user.firstName} {selectedPatientDetails.user.lastName}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><strong>CHF ID:</strong></TableCell>
+                    <TableCell>{selectedPatientDetails.chfId}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><strong>Diagnosis:</strong></TableCell>
+                    <TableCell>{selectedPatientDetails.cancer?.cancerName || 'N/A'}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><strong>Status:</strong></TableCell>
+                    <TableCell>{selectedPatientDetails.status?.status_details?.label || 'N/A'}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+      
+              <Typography variant="h6" sx={{ mt: 2 }}>Care Plan</Typography>
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell><strong>Plan:</strong></TableCell>
+                    <TableCell>{selectedPatientDetails.carePlan || 'No care plan assigned'}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><strong>Amount Recommended:</strong></TableCell>
+                    <TableCell>{selectedPatientDetails.amountRecommended || 'N/A'}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClosePatientDetailsModal}>Close</Button>
+        </DialogActions>
+      </Dialog>
+      
     </Box>
   );
 };

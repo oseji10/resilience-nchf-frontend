@@ -195,7 +195,7 @@ const DoctorPendingPatientsTable = () => {
                 <TableCell>Patient Name</TableCell>
                 <TableCell>Diagnosis</TableCell>
                 <TableCell>Status</TableCell>
-                {/* <TableCell>Actions</TableCell> */}
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -204,12 +204,17 @@ const DoctorPendingPatientsTable = () => {
                   <TableCell>{patient.chfId}</TableCell>
                   <TableCell>{patient.user.firstName} {patient.user.lastName}</TableCell>
                   <TableCell>{patient.cancer?.cancerName || 'N/A'}</TableCell>
-                  <TableCell>Reviewed</TableCell>
-                  {/* <TableCell>
+                  <TableCell>
+  <Box sx={{ display: 'inline-block', px: 1, py: 0.5, borderRadius: 1, backgroundColor: 'error.light', color: 'error.contrastText' }}>
+    PENDING REVIEW
+  </Box>
+</TableCell>
+
+                  <TableCell>
                     <IconButton onClick={() => handleOpenAssignDoctorModal(patient)} color="primary">
                       <Edit />
                     </IconButton>
-                  </TableCell> */}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -229,7 +234,7 @@ const DoctorPendingPatientsTable = () => {
       <Dialog open={openAssignDoctorModal} onClose={handleCloseAssignDoctorModal}>
         <DialogTitle>Assign Care Plan</DialogTitle>
         <DialogContent>
-          <TextField label="Care Plan" fullWidth value={carePlan} onChange={(e) => setCarePlan(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField multiline rows={4} label="Care Plan" fullWidth value={carePlan} onChange={(e) => setCarePlan(e.target.value)} style={{ marginBottom: '10px' }} />
           <TextField label="Amount Recommended" fullWidth type="number" value={amountRecommended} onChange={(e) => setAmountRecommended(e.target.value)} style={{ marginBottom: '10px' }} />
           <FormControlLabel control={<Checkbox checked={approved} onChange={(e) => setApproved(e.target.checked)} />} label="By clicking on this checkbox I recommend this patient for funding." />
         </DialogContent>
