@@ -139,6 +139,18 @@ const App = () => {
       permission: "doctor_manage_patients",
     },
     {
+      label: "Reviewed Patients",
+      icon: <i className="ri-check-fill" />,
+      href: "/dashboard/users/doctor/reviewed",
+      permission: "doctor_manage_patients",
+    },
+    {
+      label: "Pending Patients",
+      icon: <i className="ri-hourglass-fill" />,
+      href: "/dashboard/users/doctor/pending",
+      permission: "doctor_manage_patients",
+    },
+    {
       label: "Patient Billings",
       icon: <i className="ri-shopping-bag-4-fill" />,
       href: "/dashboard/doctor/patient/billings",

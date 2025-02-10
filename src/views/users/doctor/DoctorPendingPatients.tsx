@@ -33,7 +33,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import Cookies from 'js-cookie';
 
-const DoctorPatientsTable = () => {
+const DoctorPendingPatientsTable = () => {
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,7 +52,7 @@ const DoctorPatientsTable = () => {
     const fetchPatients = async () => {
       try {
         const token = Cookies.get('authToken');
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/all`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/pending`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setPatients(response.data);
@@ -172,7 +172,7 @@ const DoctorPatientsTable = () => {
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        My Patients
+        Patients Penidng Review
       </Typography>
       <TextField
         label="Search Patients"
@@ -195,7 +195,7 @@ const DoctorPatientsTable = () => {
                 <TableCell>Patient Name</TableCell>
                 <TableCell>Diagnosis</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell>Actions</TableCell>
+                {/* <TableCell>Actions</TableCell> */}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -204,12 +204,12 @@ const DoctorPatientsTable = () => {
                   <TableCell>{patient.chfId}</TableCell>
                   <TableCell>{patient.user.firstName} {patient.user.lastName}</TableCell>
                   <TableCell>{patient.cancer?.cancerName || 'N/A'}</TableCell>
-                  <TableCell>{patient.status?.status_details?.label || 'N/A'}</TableCell>
-                  <TableCell>
+                  <TableCell>Reviewed</TableCell>
+                  {/* <TableCell>
                     <IconButton onClick={() => handleOpenAssignDoctorModal(patient)} color="primary">
                       <Edit />
                     </IconButton>
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
               ))}
             </TableBody>
@@ -243,4 +243,4 @@ const DoctorPatientsTable = () => {
   );
 };
 
-export default DoctorPatientsTable;
+export default DoctorPendingPatientsTable;

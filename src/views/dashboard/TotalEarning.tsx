@@ -59,13 +59,13 @@ const TotalEarning = () => {
       <CardContent className='flex flex-col gap-11 md:mbs-2.5'>
         <div>
           <div className='flex items-center'>
-            <Typography variant='h3'>₦1,455,895.00</Typography>
+            <Typography variant='h3'>₦0.00</Typography>
             {/* <i className='ri-arrow-up-s-line align-bottom text-success'></i> */}
             {/* <Typography component='span' color='success.main'>
               10%
             </Typography> */}
           </div>
-          <Typography>₦125,000 spent last month</Typography>
+          <Typography>₦0.00 spent last month</Typography>
         </div>
         
       </CardContent>

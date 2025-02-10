@@ -41,7 +41,7 @@ const HospitalPatientsTable = () => {
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [assigning, setAssigning] = useState(true);
+  const [assigning, setAssigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openAssignDoctorModal, setOpenAssignDoctorModal] = useState(false);
   const [doctors, setDoctors] = useState([]); // Store doctors
@@ -104,14 +104,17 @@ const HospitalPatientsTable = () => {
     setSelectedDoctor(null);
   };
 
+  // const [assigning, setAssigning] = useState<{ [key: string]: boolean }>({});
+
   const handleDoctorAssign = async () => {
     if (!selectedDoctor) {
       Swal.fire('Error!', 'Please select a doctor.', 'error');
       return;
     }
-
-    setLoading(true);
-    setAssigning(true);
+  
+    // Set assigning state only for the selected patient
+    setAssigning((prev) => ({ ...prev, [selectedPatient.patientId]: true }));
+  
     try {
       const token = Cookies.get('authToken');
       const response = await axios.post(
@@ -122,23 +125,21 @@ const HospitalPatientsTable = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      setAssigning(false);
-      handleCloseAssignDoctorModal(); // Close modal before alert
-
+  
       if (response.status === 200 || response.status === 201) {
         Swal.fire('Success!', 'Doctor assigned successfully!', 'success');
       } else {
         Swal.fire('Error!', `Unexpected response: ${response.status}`, 'error');
       }
     } catch (error) {
-      handleCloseAssignDoctorModal();
       Swal.fire('Oops!', 'An error occurred.', 'error');
     } finally {
-      setLoading(false);
+      // Reset assigning state for the specific patient
+      setAssigning((prev) => ({ ...prev, [selectedPatient.patientId]: false }));
+      handleCloseAssignDoctorModal();
     }
   };
-
+  
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
