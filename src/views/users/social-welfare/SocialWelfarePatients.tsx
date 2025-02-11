@@ -33,7 +33,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import Cookies from 'js-cookie';
 
-const DoctorPatientsTable = () => {
+const SocialWelfarePatientsTable = () => {
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,9 +48,40 @@ const DoctorPatientsTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+    const [appearance, setAppearance] = useState('');
+    const [bmi, setBmi] = useState('');
+    const [commentOnHome, setCommentOnHome] = useState('');
+    const [commentOnEnvironment, setCommentOnEnvironment] = useState('');
+    const [commentOnFamily, setCommentOnFamily] = useState('');
+    const [generalComment, setGeneralComment] = useState('');
 
   const [openPatientDetailsModal, setOpenPatientDetailsModal] = useState(false);
 const [selectedPatientDetails, setSelectedPatientDetails] = useState(null);
+
+const [formData, setFormData] = useState({
+  appearance: "",
+  bmi: "",
+  commentOnEnvironment: "",
+  commentOnHome: "",
+  commentOnFamily: "",
+  generalComment: "",
+  // patientId: selectedPatient.patientId
+});
+
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  setFormData({ ...formData, [name]: value });
+};
+
+// useEffect(() => {
+//   if (selectedPatientDetails) {
+//     setFormData((prevData) => ({
+//       ...prevData,
+//       patientId: selectedPatientDetails.patientId,
+//     }));
+//   }
+// }, [selectedPatientDetails]);
+
 
 // Function to open patient details modal
 const handleOpenPatientDetailsModal = (patient) => {
@@ -68,7 +99,7 @@ const handleClosePatientDetailsModal = () => {
     const fetchPatients = async () => {
       try {
         const token = Cookies.get('authToken');
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/all`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/patient/social-welfare/all`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setPatients(response.data);
@@ -104,6 +135,9 @@ const handleClosePatientDetailsModal = () => {
     setApproved(false);
   };
 
+
+
+
   const handleAssignCarePlan = async () => {
     
     if (!approved) {
@@ -117,11 +151,16 @@ const handleClosePatientDetailsModal = () => {
     try {
       const token = Cookies.get('authToken');
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/careplan`,
+        `${process.env.NEXT_PUBLIC_APP_URL}/patient/social-welfare/assessment`,
         {
           patientId: selectedPatient.patientId,
-          carePlan,
-          amountRecommended,
+          
+              appearance,
+              bmi,
+              commentOnHome,
+              commentOnFamily,
+              commentOnEnvironment,
+              generalComment,
           status: 'approved',
         },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -160,11 +199,15 @@ const handleClosePatientDetailsModal = () => {
         try {
           const token = Cookies.get('authToken');
           const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/careplan`,
+            `${process.env.NEXT_PUBLIC_APP_URL}/patient/social-welfare/assessment`,
             {
               patientId: selectedPatient.patientId,
-              carePlan,
-              amountRecommended,
+              appearance,
+              bmi,
+              commentOnHome,
+              commentOnFamily,
+              commentOnEnvironment,
+              generalComment,
               status: 'disapproved',
             },
             { headers: { Authorization: `Bearer ${token}` } }
@@ -185,6 +228,7 @@ const handleClosePatientDetailsModal = () => {
     });
   };
 
+  
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
@@ -220,12 +264,12 @@ const handleClosePatientDetailsModal = () => {
                   <TableCell>{patient.chfId}</TableCell>
                   <TableCell>{patient.user.firstName} {patient.user.lastName}</TableCell>
                   <TableCell>{patient.cancer?.cancerName || 'N/A'}</TableCell>
-                  <TableCell>{patient.status?.status_details?.label || 'N/A'}</TableCell>
+                  <TableCell>{patient.status?.status_details?.label || 'N/A'} Completed</TableCell>
                   <TableCell>
                   <IconButton onClick={() => handleOpenPatientDetailsModal(patient)} color="primary">
     <Visibility />
   </IconButton>
-  {patient.status.statusId !== 3 && ( 
+  {patient.status.statusId !== 4 && ( 
   <IconButton onClick={() => handleOpenAssignDoctorModal(patient)} color="primary">
     <Edit />
   </IconButton>
@@ -248,12 +292,15 @@ const handleClosePatientDetailsModal = () => {
         </TableContainer>
       )}
 
-      {/* Assign Care Plan Modal */}
-      <Dialog open={openAssignDoctorModal} onClose={handleCloseAssignDoctorModal}>
+ <Dialog open={openAssignDoctorModal} onClose={handleCloseAssignDoctorModal}>
         <DialogTitle>Assign Care Plan</DialogTitle>
         <DialogContent>
-          <TextField multiline rows={4}  label="Care Plan" fullWidth value={carePlan} onChange={(e) => setCarePlan(e.target.value)} style={{ marginBottom: '10px' }} />
-          <TextField label="Amount Recommended" fullWidth type="number" value={amountRecommended} onChange={(e) => setAmountRecommended(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField multiline rows={2}  label="Appearance" fullWidth value={appearance} onChange={(e) => setAppearance(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField type='number' label="BMI" fullWidth value={bmi} onChange={(e) => setBmi(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField multiline rows={2}  label="Comment On Home" fullWidth value={commentOnHome} onChange={(e) => setCommentOnHome(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField multiline rows={2}  label="Comment On Family" fullWidth value={commentOnFamily} onChange={(e) => setCommentOnFamily(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField multiline rows={2} label="Comment On Environment" fullWidth value={commentOnEnvironment} onChange={(e) => setCommentOnEnvironment(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField multiline rows={2}  label="General Comment" fullWidth value={generalComment} onChange={(e) => setGeneralComment(e.target.value)} style={{ marginBottom: '10px' }} />
           <FormControlLabel control={<Checkbox checked={approved} onChange={(e) => setApproved(e.target.checked)} />} label="By clicking on this checkbox I recommend this patient for funding." />
         </DialogContent>
         <DialogActions>
@@ -262,6 +309,75 @@ const handleClosePatientDetailsModal = () => {
           <Button variant="contained" color="error" onClick={handleDisapproveCarePlan} disabled={assigning}>Disapprove</Button>
         </DialogActions>
       </Dialog>
+
+{/* <Dialog open={openAssignDoctorModal} onClose={handleCloseAssignDoctorModal}>
+  <DialogTitle>Edit Patient Details</DialogTitle>
+  <DialogContent>
+  <TextField
+  label="Appearance"
+  name="appearance"
+  value={formData.appearance}
+  onChange={handleChange}
+  fullWidth
+  margin="dense"
+/>
+<TextField
+  label="BMI"
+  name="bmi"
+  type="number"
+  value={formData.bmi}
+  onChange={handleChange}
+  fullWidth
+  margin="dense"
+/>
+<TextField
+  label="Comment on Home"
+  name="commentOnHome"
+  value={formData.commentOnHome}
+  onChange={handleChange}
+  fullWidth
+  margin="dense"
+  multiline
+  rows={2}
+/>
+<TextField
+  label="Comment on Environment"
+  name="commentOnEnvironment"
+  value={formData.commentOnEnvironment}
+  onChange={handleChange}
+  fullWidth
+  margin="dense"
+  multiline
+  rows={2}
+/>
+<TextField
+  label="Comment on Family"
+  name="commentOnFamily"
+  value={formData.commentOnFamily}
+  onChange={handleChange}
+  fullWidth
+  margin="dense"
+  multiline
+  rows={2}
+/>
+<TextField
+  label="General Comment"
+  name="generalComment"
+  value={formData.generalComment}
+  onChange={handleChange}
+  fullWidth
+  margin="dense"
+  multiline
+  rows={3}
+/>
+
+  </DialogContent>
+  <DialogActions>
+    <Button 
+    onClick={handleCloseAssignDoctorModal}>Cancel</Button>
+    <Button onClick={handleSubmitSWAssessment} color="primary">Save</Button>
+  </DialogActions>
+</Dialog> */}
 
 {/* Patient Details Modal */}
 <Dialog open={openPatientDetailsModal} onClose={handleClosePatientDetailsModal} maxWidth="md" fullWidth>
@@ -317,4 +433,4 @@ const handleClosePatientDetailsModal = () => {
   );
 };
 
-export default DoctorPatientsTable;
+export default SocialWelfarePatientsTable;

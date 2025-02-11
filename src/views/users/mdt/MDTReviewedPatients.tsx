@@ -33,7 +33,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import Cookies from 'js-cookie';
 
-const DoctorPatientsTable = () => {
+const MDTReviewedPatientsTable = () => {
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,25 +50,25 @@ const DoctorPatientsTable = () => {
 
 
   const [openPatientDetailsModal, setOpenPatientDetailsModal] = useState(false);
-const [selectedPatientDetails, setSelectedPatientDetails] = useState(null);
-
-// Function to open patient details modal
-const handleOpenPatientDetailsModal = (patient) => {
-  setSelectedPatientDetails(patient);
-  setOpenPatientDetailsModal(true);
-};
-
-// Function to close patient details modal
-const handleClosePatientDetailsModal = () => {
-  setOpenPatientDetailsModal(false);
-  setSelectedPatientDetails(null);
-};
+  const [selectedPatientDetails, setSelectedPatientDetails] = useState(null);
+  
+  // Function to open patient details modal
+  const handleOpenPatientDetailsModal = (patient) => {
+    setSelectedPatientDetails(patient);
+    setOpenPatientDetailsModal(true);
+  };
+  
+  // Function to close patient details modal
+  const handleClosePatientDetailsModal = () => {
+    setOpenPatientDetailsModal(false);
+    setSelectedPatientDetails(null);
+  };
 
   useEffect(() => {
     const fetchPatients = async () => {
       try {
         const token = Cookies.get('authToken');
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/all`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/patient/mdt/reviewed`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setPatients(response.data);
@@ -188,7 +188,7 @@ const handleClosePatientDetailsModal = () => {
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        My Patients
+       Reviewed Patients
       </Typography>
       <TextField
         label="Search Patients"
@@ -220,19 +220,21 @@ const handleClosePatientDetailsModal = () => {
                   <TableCell>{patient.chfId}</TableCell>
                   <TableCell>{patient.user.firstName} {patient.user.lastName}</TableCell>
                   <TableCell>{patient.cancer?.cancerName || 'N/A'}</TableCell>
-                  <TableCell>{patient.status?.status_details?.label || 'N/A'}</TableCell>
                   <TableCell>
-                  <IconButton onClick={() => handleOpenPatientDetailsModal(patient)} color="primary">
-    <Visibility />
-  </IconButton>
-  {patient.status.statusId !== 3 && ( 
-  <IconButton onClick={() => handleOpenAssignDoctorModal(patient)} color="primary">
-    <Edit />
-  </IconButton>
-)}
-
+  <Box sx={{ display: 'inline-block', px: 1, py: 0.5, borderRadius: 1, backgroundColor: 'success.light', color: 'success.contrastText' }}>
+    REVIEWED
+  </Box>
 </TableCell>
 
+
+                  <TableCell>
+                    <IconButton onClick={() => handleOpenPatientDetailsModal(patient)} color="primary">
+                        <Visibility />
+                      </IconButton>
+                    {/* <IconButton onClick={() => handleOpenAssignDoctorModal(patient)} color="primary">
+                      <Edit />
+                    </IconButton> */}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -252,7 +254,7 @@ const handleClosePatientDetailsModal = () => {
       <Dialog open={openAssignDoctorModal} onClose={handleCloseAssignDoctorModal}>
         <DialogTitle>Assign Care Plan</DialogTitle>
         <DialogContent>
-          <TextField multiline rows={4}  label="Care Plan" fullWidth value={carePlan} onChange={(e) => setCarePlan(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField label="Care Plan" fullWidth value={carePlan} onChange={(e) => setCarePlan(e.target.value)} style={{ marginBottom: '10px' }} />
           <TextField label="Amount Recommended" fullWidth type="number" value={amountRecommended} onChange={(e) => setAmountRecommended(e.target.value)} style={{ marginBottom: '10px' }} />
           <FormControlLabel control={<Checkbox checked={approved} onChange={(e) => setApproved(e.target.checked)} />} label="By clicking on this checkbox I recommend this patient for funding." />
         </DialogContent>
@@ -263,58 +265,64 @@ const handleClosePatientDetailsModal = () => {
         </DialogActions>
       </Dialog>
 
-{/* Patient Details Modal */}
-<Dialog open={openPatientDetailsModal} onClose={handleClosePatientDetailsModal} maxWidth="md" fullWidth>
-  <DialogTitle>Patient Details</DialogTitle>
-  <DialogContent>
-    {selectedPatientDetails && (
-      <Box>
-        <Typography variant="h6">Personal Information</Typography>
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell><strong>Name:</strong></TableCell>
-              <TableCell>{selectedPatientDetails.user.firstName} {selectedPatientDetails.user.lastName}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell><strong>CHF ID:</strong></TableCell>
-              <TableCell>{selectedPatientDetails.chfId}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell><strong>Diagnosis:</strong></TableCell>
-              <TableCell>{selectedPatientDetails.cancer?.cancerName || 'N/A'}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell><strong>Status:</strong></TableCell>
-              <TableCell>{selectedPatientDetails.status?.status_details?.label || 'N/A'}</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
 
-        <Typography variant="h6" sx={{ mt: 2 }}>Care Plan</Typography>
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell><strong>Plan:</strong></TableCell>
-              <TableCell>{selectedPatientDetails.carePlan || 'No care plan assigned'}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell><strong>Amount Recommended:</strong></TableCell>
-              <TableCell>{selectedPatientDetails.amountRecommended || 'N/A'}</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </Box>
-    )}
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={handleClosePatientDetailsModal}>Close</Button>
-  </DialogActions>
-</Dialog>
+      
+      {/* Patient Details Modal */}
+      <Dialog open={openPatientDetailsModal} onClose={handleClosePatientDetailsModal} maxWidth="md" fullWidth>
+        <DialogTitle>Patient Details</DialogTitle>
+        <DialogContent>
+          {selectedPatientDetails && (
+            <Box>
+              <Typography variant="h6">Personal Information</Typography>
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell><strong>Name:</strong></TableCell>
+                    <TableCell>{selectedPatientDetails.user.firstName} {selectedPatientDetails.user.lastName}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><strong>CHF ID:</strong></TableCell>
+                    <TableCell>{selectedPatientDetails.chfId}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><strong>Diagnosis:</strong></TableCell>
+                    <TableCell>{selectedPatientDetails.cancer?.cancerName || 'N/A'}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><strong>Status:</strong></TableCell>
+                    <TableCell>{selectedPatientDetails.status?.status_details?.label || 'N/A'}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+      
+              <Typography variant="h6" sx={{ mt: 2 }}>Doctor Care Plan</Typography>
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell><strong>Plan:</strong></TableCell>
+                    <TableCell>{selectedPatientDetails?.doctor_assessment?.carePlan || 'No care plan assigned'}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><strong>Amount Recommended:</strong></TableCell>
+                    <TableCell>
+  {selectedPatientDetails?.doctor_assessment?.amountRecommended
+    ? `₦${Number(selectedPatientDetails.doctor_assessment.amountRecommended).toLocaleString()}`
+    : 'N/A'}
+</TableCell>
 
-
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClosePatientDetailsModal}>Close</Button>
+        </DialogActions>
+      </Dialog>
+      
     </Box>
   );
 };
 
-export default DoctorPatientsTable;
+export default MDTReviewedPatientsTable;

@@ -295,16 +295,21 @@ const DoctorReviewedPatientsTable = () => {
                 </TableBody>
               </Table>
       
-              <Typography variant="h6" sx={{ mt: 2 }}>Care Plan</Typography>
+              <Typography variant="h6" sx={{ mt: 2 }}>Doctor Care Plan</Typography>
               <Table>
                 <TableBody>
                   <TableRow>
                     <TableCell><strong>Plan:</strong></TableCell>
-                    <TableCell>{selectedPatientDetails.carePlan || 'No care plan assigned'}</TableCell>
+                    <TableCell>{selectedPatientDetails?.doctor_assessment?.carePlan || 'No care plan assigned'}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell><strong>Amount Recommended:</strong></TableCell>
-                    <TableCell>{selectedPatientDetails.amountRecommended || 'N/A'}</TableCell>
+                    <TableCell>
+  {selectedPatientDetails?.doctor_assessment?.amountRecommended
+    ? `₦${Number(selectedPatientDetails.doctor_assessment.amountRecommended).toLocaleString()}`
+    : 'N/A'}
+</TableCell>
+
                   </TableRow>
                 </TableBody>
               </Table>

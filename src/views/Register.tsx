@@ -17,7 +17,7 @@ import Select from '@mui/material/Select'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
 import Grid from '@mui/material/Grid'
-
+import { useRouter } from 'next/navigation'
 // SweetAlert2 Import
 import Swal from 'sweetalert2'
 import Logo from '@/@core/svg/Logo'
@@ -37,6 +37,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false)
   const [languages, setLanguages] = useState([])
 
+  const router = useRouter();
   // Fetch languages on component mount
   useEffect(() => {
     const fetchLanguages = async () => {
@@ -79,6 +80,7 @@ const Register = () => {
         })
 
         setFormData({ phoneNumber: '', email: '', firstName: '', lastName: '', otherNames: '', languageId: '' })
+        setTimeout(() => router.push('/login'), 1500);
       } else {
         let errorMessage = result.message || 'Something went wrong. Please try again.'
 

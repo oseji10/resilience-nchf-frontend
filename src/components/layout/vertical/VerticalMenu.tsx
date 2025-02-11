@@ -113,6 +113,12 @@ const App = () => {
 
   const menuItems = [
     {
+      label: "Dashboard",
+      icon: <i className="ri-dashboard-fill" />,
+      href: "/dashboard",
+      
+    },
+    {
       label: "Apply",
       icon: <i className="ri-pencil-fill" />,
       href: "/dashboard/apply/biodata",
@@ -201,7 +207,7 @@ const App = () => {
     {
       label: "Manage Users",
       icon: <i className="ri-group-fill" />,
-      href: "/dashboard/users/hospital-admins",
+      href: "/dashboard/users/hospital-admin",
       permission: "manage_hospital_admins",
     },
 
@@ -237,6 +243,49 @@ const App = () => {
       permission: "manage_hospital_staff",
     },
 
+// Social Welfare
+{
+  label: "My Patients",
+  icon: <i className="ri-group-fill" />,
+  href: "/dashboard/users/social-welfare/patients",
+  permission: "social_welfare_manage_patients",
+},
+{
+  label: "Reviewed Patients",
+  icon: <i className="ri-check-fill" />,
+  href: "/dashboard/users/social-welfare/reviewed",
+  permission: "social_welfare_manage_patients",
+},
+{
+  label: "Pending Patients",
+  icon: <i className="ri-hourglass-fill" />,
+  href: "/dashboard/users/social-welfare/pending",
+  permission: "social_welfare_manage_patients",
+},
+
+
+// MDT Roles
+{
+  label: "My Patients",
+  icon: <i className="ri-group-fill" />,
+  href: "/dashboard/users/mdt/patients",
+  permission: "mdt_manage_patients",
+},
+{
+  label: "Reviewed Patients",
+  icon: <i className="ri-check-fill" />,
+  href: "/dashboard/users/mdt/reviewed",
+  permission: "mdt_manage_patients",
+},
+{
+  label: "Pending Patients",
+  icon: <i className="ri-hourglass-fill" />,
+  href: "/dashboard/users/mdt/pending",
+  permission: "mdt_manage_patients",
+},
+
+
+
     // {
     //   label: "Users",
     //   icon: <i className="ri-group-fill" />,
@@ -248,6 +297,7 @@ const App = () => {
     //     { label: "Other Users", href: "/dashboard/users", permission: "manage_other_users" },
     //   ],
     // },
+
 
     
 

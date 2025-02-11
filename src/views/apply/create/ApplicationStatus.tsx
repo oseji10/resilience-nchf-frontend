@@ -84,7 +84,7 @@ const ApplicationStatus = () => {
           <Box sx={{ mt: 3, ml: 5 }}>
             <Stepper activeStep={currentStep} orientation="vertical">
               {steps.map(({ statusId, label, description }, index) => (
-                <Step key={statusId} completed={index < currentStep}>
+                <Step key={statusId} completed={index <= currentStep}>
                   <StepLabel>
                     <Typography variant="h6">{label}</Typography>
                     <Typography variant="body2" color="textSecondary">

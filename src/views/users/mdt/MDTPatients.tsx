@@ -33,7 +33,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import Cookies from 'js-cookie';
 
-const DoctorPatientsTable = () => {
+const MDTPatientsTable = () => {
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,9 +48,30 @@ const DoctorPatientsTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+    const [diagnosticProceedures, setDiagnosticProceedures] = useState('');
+    const [costAssociatedWithSurgery, setCostAssociatedWithSurgery] = useState('');
+    const [servicesToBereceived, setServicesToBeReceived] = useState('');
+    const [medications, setMedications] = useState('');
+    const [radiotherapyCost, setRadiotherapyCost] = useState('');
+    
 
   const [openPatientDetailsModal, setOpenPatientDetailsModal] = useState(false);
 const [selectedPatientDetails, setSelectedPatientDetails] = useState(null);
+
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  setFormData({ ...formData, [name]: value });
+};
+
+// useEffect(() => {
+//   if (selectedPatientDetails) {
+//     setFormData((prevData) => ({
+//       ...prevData,
+//       patientId: selectedPatientDetails.patientId,
+//     }));
+//   }
+// }, [selectedPatientDetails]);
+
 
 // Function to open patient details modal
 const handleOpenPatientDetailsModal = (patient) => {
@@ -68,7 +89,7 @@ const handleClosePatientDetailsModal = () => {
     const fetchPatients = async () => {
       try {
         const token = Cookies.get('authToken');
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/all`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/patient/mdt/all`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setPatients(response.data);
@@ -104,6 +125,9 @@ const handleClosePatientDetailsModal = () => {
     setApproved(false);
   };
 
+
+
+
   const handleAssignCarePlan = async () => {
     
     if (!approved) {
@@ -117,11 +141,16 @@ const handleClosePatientDetailsModal = () => {
     try {
       const token = Cookies.get('authToken');
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/careplan`,
+        `${process.env.NEXT_PUBLIC_APP_URL}/patient/mdt/assessment`,
         {
           patientId: selectedPatient.patientId,
-          carePlan,
-          amountRecommended,
+          
+              diagnosticProceedures,
+              costAssociatedWithSurgery,
+              servicesToBereceived,
+              medications,
+              radiotherapyCost,
+              
           status: 'approved',
         },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -160,18 +189,21 @@ const handleClosePatientDetailsModal = () => {
         try {
           const token = Cookies.get('authToken');
           const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/careplan`,
+            `${process.env.NEXT_PUBLIC_APP_URL}/patient/mdt/assessment`,
             {
               patientId: selectedPatient.patientId,
-              carePlan,
-              amountRecommended,
+              diagnosticProceedures,
+              costAssociatedWithSurgery,
+              servicesToBereceived,
+              medications,
+              radiotherapyCost,
               status: 'disapproved',
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );
 
           if (response.status === 200 || response.status === 201) {
-            Swal.fire('Success!', 'Care plan disapproved.', 'success');
+            Swal.fire('Success!', 'MDT plan disapproved.', 'success');
             handleCloseAssignDoctorModal();
           } else {
             Swal.fire('Error!', `Unexpected response: ${response.status}`, 'error');
@@ -185,6 +217,7 @@ const handleClosePatientDetailsModal = () => {
     });
   };
 
+  
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
@@ -220,12 +253,12 @@ const handleClosePatientDetailsModal = () => {
                   <TableCell>{patient.chfId}</TableCell>
                   <TableCell>{patient.user.firstName} {patient.user.lastName}</TableCell>
                   <TableCell>{patient.cancer?.cancerName || 'N/A'}</TableCell>
-                  <TableCell>{patient.status?.status_details?.label || 'N/A'}</TableCell>
+                  <TableCell>{patient.status?.status_details?.label || 'N/A'} Completed</TableCell>
                   <TableCell>
                   <IconButton onClick={() => handleOpenPatientDetailsModal(patient)} color="primary">
     <Visibility />
   </IconButton>
-  {patient.status.statusId !== 3 && ( 
+  {patient.status.statusId !== 5 && ( 
   <IconButton onClick={() => handleOpenAssignDoctorModal(patient)} color="primary">
     <Edit />
   </IconButton>
@@ -248,12 +281,15 @@ const handleClosePatientDetailsModal = () => {
         </TableContainer>
       )}
 
-      {/* Assign Care Plan Modal */}
-      <Dialog open={openAssignDoctorModal} onClose={handleCloseAssignDoctorModal}>
-        <DialogTitle>Assign Care Plan</DialogTitle>
+ <Dialog open={openAssignDoctorModal} onClose={handleCloseAssignDoctorModal}>
+        <DialogTitle>Patient Assessment</DialogTitle>
         <DialogContent>
-          <TextField multiline rows={4}  label="Care Plan" fullWidth value={carePlan} onChange={(e) => setCarePlan(e.target.value)} style={{ marginBottom: '10px' }} />
-          <TextField label="Amount Recommended" fullWidth type="number" value={amountRecommended} onChange={(e) => setAmountRecommended(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField multiline rows={2}  label="Diagnostic Proceedures" fullWidth value={diagnosticProceedures} onChange={(e) => setDiagnosticProceedures(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField type='number' label="cost" fullWidth value={costAssociatedWithSurgery} onChange={(e) => setCostAssociatedWithSurgery(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField multiline rows={2}  label="Services To Be Received" fullWidth value={servicesToBereceived} onChange={(e) => setServicesToBeReceived(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField multiline rows={2}  label="Medications" fullWidth value={medications} onChange={(e) => setMedications(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField type='number' label="Radiotherapy Cost" fullWidth value={radiotherapyCost} onChange={(e) => setRadiotherapyCost(e.target.value)} style={{ marginBottom: '10px' }} />
+          
           <FormControlLabel control={<Checkbox checked={approved} onChange={(e) => setApproved(e.target.checked)} />} label="By clicking on this checkbox I recommend this patient for funding." />
         </DialogContent>
         <DialogActions>
@@ -317,4 +353,4 @@ const handleClosePatientDetailsModal = () => {
   );
 };
 
-export default DoctorPatientsTable;
+export default MDTPatientsTable;

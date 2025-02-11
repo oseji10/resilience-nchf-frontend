@@ -270,7 +270,7 @@ useEffect(() => {
         }
       ); // Update with your API endpoint
       const data = await response.json();
-      setStates(data.states);
+      setStates(data);
     } catch (error) {
       console.error("Error fetching states:", error);
     }
