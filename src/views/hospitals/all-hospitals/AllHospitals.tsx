@@ -486,7 +486,7 @@ useEffect(() => {
                 {/* <TableCell>{hospital?.hospital_admin?.firstName} {hospital?.hospital_admin?.lastName}</TableCell>
                 <TableCell>{hospital?.hospital_c_m_d?.firstName} {hospital?.hospital_c_m_d?.lastName}</TableCell>
                  */}
-  <TableCell>
+  {/* <TableCell>
   {!hospital?.hospital_admin?.firstName && !hospital?.hospital_admin?.lastName && (
     <Button onClick={() => handleAssignAdminModal(hospital.hospitalId)}>
       Assign Admin
@@ -499,7 +499,7 @@ useEffect(() => {
       Assign CMD
     </Button>
   )}
-</TableCell>
+</TableCell> */}
 
 <TableCell>{hospital?.hospital_admin?.firstName} {hospital?.hospital_admin?.lastName}</TableCell>
 <TableCell>{hospital?.hospital_c_m_d?.firstName} {hospital?.hospital_c_m_d?.lastName}</TableCell>

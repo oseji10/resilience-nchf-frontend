@@ -200,7 +200,7 @@ const App = () => {
     {
       label: "Hospitals",
       icon: <i className="ri-hospital-fill" />,
-      href: "/dashboard/hospitals",
+      href: "/dashboard/nicrat-ict/hospitals",
       permission: "view_all_hospitals",
     },
 
@@ -213,10 +213,10 @@ const App = () => {
 
 
     {
-      label: "Appointments",
-      icon: <i className="ri-calendar-line" />,
-      href: "/dashboard/appointments",
-      permission: "manage_appointments",
+      label: "Hospital Maps",
+      icon: <i className="ri-map-line" />,
+      href: "/dashboard/nicrat-ict/",
+      permission: "view_all_hospitals",
     },
 
 
@@ -285,6 +285,104 @@ const App = () => {
 },
 
 
+// CMD ROLES
+{
+  label: "My Patients",
+  icon: <i className="ri-group-fill" />,
+  href: "/dashboard/users/cmd/patients",
+  permission: "cmd_manage_patients",
+},
+{
+  label: "Reviewed Patients",
+  icon: <i className="ri-check-fill" />,
+  href: "/dashboard/users/cmd/reviewed",
+  permission: "cmd_manage_patients",
+},
+{
+  label: "Pending Patients",
+  icon: <i className="ri-hourglass-fill" />,
+  href: "/dashboard/users/cmd/pending",
+  permission: "cmd_manage_patients",
+},
+
+{
+  label: "Patient Billings",
+  icon: <i className="ri-shopping-cart-fill" />,
+  href: "/dashboard/users/cmd/pending",
+  permission: "cmd_manage_billings",
+},
+
+{
+  label: "Invoices",
+  icon: <i className="ri-receipt-fill" />,
+  href: "/dashboard/users/cmd/invoices",
+  permission: "cmd_manage_billings",
+},
+
+
+// NICRAT DG ROLES
+{
+  label: "All Patients",
+  icon: <i className="ri-group-fill" />,
+  href: "/dashboard/users/nicrat/patients",
+  permission: "dg_manage_patients",
+},
+{
+  label: "Approved Patients",
+  icon: <i className="ri-thumb-up-fill" />,
+  href: "/dashboard/users/nicrat/reviewed",
+  permission: "dg_manage_patients",
+},
+{
+  label: "Awaiting Approval",
+  icon: <i className="ri-hourglass-fill" />,
+  href: "/dashboard/users/nicrat/pending",
+  permission: "dg_manage_patients",
+},
+
+
+// NICRAT FANDA ROLES
+{
+  label: "Ewallets",
+  icon: <i className="ri-wallet-fill" />,
+  href: "/dashboard/nicrat-fanda/ewallet",
+  permission: "fanda_topup_ewallet",
+},
+
+{
+  label: "Hospital Billings",
+  icon: <i className="ri-shopping-cart-fill" />,
+  href: "/dashboard/users/nicrat/pending",
+  permission: "fanda_topup_ewallet",
+},
+
+{
+  label: "Hospitals",
+  icon: <i className="ri-hospital-fill" />,
+  href: "/dashboard/hospitals",
+  permission: "dg_manage_hospitals",
+},
+
+{
+  label: "Invoices",
+  icon: <i className="ri-receipt-fill" />,
+  href: "/dashboard/users/nicrat/invoices",
+  permission: "dg_manage_invoices",
+},
+
+{
+  label: "E-wallets",
+  icon: <i className="ri-wallet-fill" />,
+  href: "/dashboard/users/nicrat/invoices",
+  permission: "dg_manage_ewallets",
+},
+
+{
+  label: "Analytics",
+  icon: <i className="ri-pie-chart-2-fill" />,
+  href: "/dashboard/users/nicrat/invoices",
+  permission: "dg_manage_analytics",
+},
 
     // {
     //   label: "Users",

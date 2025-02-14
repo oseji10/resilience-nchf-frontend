@@ -256,10 +256,14 @@ runningWater: "",
           headers: { Authorization: `Bearer ${token}` }
         });
   
-        if (response.data === 2) {
+        if (response.data > 2 && response.data < 7) {
           router.replace(`/dashboard/apply/application-completed`);
-        } else {
+        } else if (response.data ===7) {
+          router.replace(`/dashboard/apply/start-care`);
+        }
+        else{
           setLoading(false); // Hide spinner if no redirect
+
         }
       } catch (error) {
         console.error("Failed to fetch application status:", error);

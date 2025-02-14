@@ -59,7 +59,7 @@ const MDTPendingPatientsTable = () => {
     const fetchPatients = async () => {
       try {
         const token = Cookies.get('authToken');
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/patient/social-welfare/pending`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/patient/cmd/pending`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setPatients(response.data);
@@ -188,7 +188,7 @@ const MDTPendingPatientsTable = () => {
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        Patients Pending Social Welfare Review
+        Patients Pending MDT Review
       </Typography>
       <TextField
         label="Search Patients"

@@ -14,6 +14,7 @@
     "postinstall": "npm run build:icons"
   },
   "dependencies": {
+    "@ant-design/graphs": "^2.0.4",
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -21,6 +22,7 @@
     "@mui/lab": "5.0.0-alpha.170",
     "@mui/material": "^6.2.1",
     "@mui/material-nextjs": "^5.15.11",
+    "@reactflow/core": "^11.11.4",
     "apexcharts": "^3.49.1",
     "axios": "^1.7.9",
     "classnames": "^2.5.1",
@@ -37,6 +39,8 @@
     "react-perfect-scrollbar": "^1.5.8",
     "react-sketch-canvas": "^6.2.0",
     "react-use": "^17.5.0",
+    "react-vis-network-graph": "^3.0.1",
+    "reactflow": "^11.11.4",
     "server-only": "^0.0.1",
     "sweetalert": "^2.1.2",
     "sweetalert2": "^11.14.5"

@@ -125,6 +125,7 @@ const Login = () => {
     severity="success" 
     icon={<CheckCircleIcon fontSize="inherit" />} 
     className="mb-3 animate-fade-in"
+    // sx={{ backgroundColor: "primary.main", color: "white" }} 
   >
     {successMessage}
   </Alert>
