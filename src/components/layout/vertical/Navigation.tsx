@@ -19,6 +19,7 @@ import useVerticalNav from '@/@menu/hooks/useVerticalNav'
 
 // Style Imports
 import navigationCustomStyles from '@/@core/styles/vertical/navigationCustomStyles'
+import Logo2 from '@/@core/svg/Logo2'
 
 const StyledBoxForShadow = styled('div')(({ theme }) => ({
   top: 60,
@@ -66,7 +67,7 @@ const Navigation = () => {
       {/* Nav Header including Logo & nav toggle icons  */}
       <NavHeader>
         <Link href='/dashboard'>
-          <Logo />
+          <Logo2 />
         </Link>
         {isBreakpointReached && <i className='ri-close-line text-xl' onClick={() => toggleVerticalNav(false)} />}
       </NavHeader>

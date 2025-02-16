@@ -2,33 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  CircularProgress,
-  Typography,
-  TextField,
-  IconButton,
-  Modal,
-  Box,
-  Button,
-  TablePagination,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  MenuItem,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  FormControlLabel,
-  Checkbox,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  CircularProgress, Typography, TextField, IconButton, Dialog, DialogTitle,
+  DialogContent, DialogActions, Button, Select, MenuItem, FormControl, InputLabel
 } from '@mui/material';
-import { Edit, Visibility } from '@mui/icons-material';
+import { Edit, Visibility, LocalPharmacy, Delete } from '@mui/icons-material';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import Cookies from 'js-cookie';
@@ -38,32 +16,21 @@ const DoctorPatientsTable = () => {
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [assigning, setAssigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [openAssignDoctorModal, setOpenAssignDoctorModal] = useState(false);
+
+  // Prescription Modal State
+  const [openPrescriptionModal, setOpenPrescriptionModal] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const [carePlan, setCarePlan] = useState('');
-  const [amountRecommended, setAmountRecommended] = useState('');
-  const [approved, setApproved] = useState(false);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [products, setProducts] = useState([]);
+  const [services, setServices] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState('');
+  const [selectedService, setSelectedService] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [cart, setCart] = useState([]); // Stores selected products and services
+  const [prescribing, setPrescribing] = useState(false);
 
-
-  const [openPatientDetailsModal, setOpenPatientDetailsModal] = useState(false);
-const [selectedPatientDetails, setSelectedPatientDetails] = useState(null);
-
-// Function to open patient details modal
-const handleOpenPatientDetailsModal = (patient) => {
-  setSelectedPatientDetails(patient);
-  setOpenPatientDetailsModal(true);
-};
-
-// Function to close patient details modal
-const handleClosePatientDetailsModal = () => {
-  setOpenPatientDetailsModal(false);
-  setSelectedPatientDetails(null);
-};
-
+  const [comments, setComments] = useState('');
+  // Fetch Patients
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -83,110 +50,92 @@ const handleClosePatientDetailsModal = () => {
     fetchPatients();
   }, []);
 
-  useEffect(() => {
-    const filtered = patients.filter((patient) =>
-      `${patient.user.firstName} ${patient.user.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      patient.chfId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (patient.cancer?.cancerName?.toLowerCase() || '').includes(searchQuery.toLowerCase())
-    );
-    setFilteredPatients(filtered);
-  }, [searchQuery, patients]);
-
-  const handleOpenAssignDoctorModal = (patient) => {
+  // Fetch Products and Services when Modal Opens
+  const handleOpenPrescriptionModal = async (patient) => {
     setSelectedPatient(patient);
-    setOpenAssignDoctorModal(true);
-  };
+    setOpenPrescriptionModal(true);
+    setCart([]); // Clear cart when opening modal
 
-  const handleCloseAssignDoctorModal = () => {
-    setOpenAssignDoctorModal(false);
-    setCarePlan('');
-    setAmountRecommended('');
-    setApproved(false);
-  };
-
-  const handleAssignCarePlan = async () => {
-    
-    if (!approved) {
-      setOpenAssignDoctorModal(false);
-
-      Swal.fire('Warning', 'You must approve the care plan by ticking the checkbox before submitting.', 'warning');
-      return;
-    }
-
-    setAssigning(true);
     try {
       const token = Cookies.get('authToken');
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/careplan`,
-        {
-          patientId: selectedPatient.patientId,
-          carePlan,
-          amountRecommended,
-          status: 'approved',
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const productsResponse = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/products`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const servicesResponse = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/services`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      if (response.status === 200 || response.status === 201) {
-        Swal.fire('Success!', 'Care plan assigned successfully!', 'success');
-        handleCloseAssignDoctorModal();
-      } else {
-        Swal.fire('Error!', `Unexpected response: ${response.status}`, 'error');
-      }
+      setProducts(productsResponse.data);
+      setServices(servicesResponse.data);
     } catch (error) {
-      Swal.fire('Oops!', 'An error occurred.', 'error');
-    } finally {
-      setAssigning(false);
+      console.error('Error fetching prescription data:', error);
     }
   };
 
-  const handleDisapproveCarePlan = async () => {
-    setOpenAssignDoctorModal(false);
-
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You are about to disapprove this care plan. This action cannot be undone.",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, disapprove it!',
-      customClass: {
-        popup: 'swal2-front' // Apply a CSS class
-      }
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        setAssigning(true);
-        try {
-          const token = Cookies.get('authToken');
-          const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/careplan`,
-            {
-              patientId: selectedPatient.patientId,
-              carePlan,
-              amountRecommended,
-              status: 'disapproved',
-            },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-
-          if (response.status === 200 || response.status === 201) {
-            Swal.fire('Success!', 'Care plan disapproved.', 'success');
-            handleCloseAssignDoctorModal();
-          } else {
-            Swal.fire('Error!', `Unexpected response: ${response.status}`, 'error');
-          }
-        } catch (error) {
-          Swal.fire('Oops!', 'An error occurred.', 'error');
-        } finally {
-          setAssigning(false);
-        }
-      }
-    });
+  // Close Prescription Modal
+  const handleClosePrescriptionModal = () => {
+    setOpenPrescriptionModal(false);
+    setSelectedProduct('');
+    setSelectedService('');
+    setQuantity(1);
   };
 
+  // Add Product to Cart
+  const handleAddProductToCart = () => {
+    if (!selectedProduct || quantity < 1) return;
+    const productDetails = products.find(p => p.productId === selectedProduct);
+    setCart([...cart, { type: 'product', id: selectedProduct, name: productDetails.productName, quantity }]);
+    setSelectedProduct('');
+    setQuantity(1);
+  };
+
+  // Add Service to Cart
+  const handleAddServiceToCart = () => {
+    if (!selectedService) return;
+    const serviceDetails = services.find(s => s.serviceId === selectedService);
+    setCart([...cart, { type: 'service', id: selectedService, name: serviceDetails.serviceName }]);
+    setSelectedService('');
+  };
+
+  // Remove Item from Cart
+  const handleRemoveFromCart = (index) => {
+    setCart(cart.filter((_, i) => i !== index));
+  };
+
+  // Handle Prescription Submission
+  const handleSubmitPrescription = async () => {
+    if (!selectedPatient || cart.length === 0) {
+      Swal.fire('Error!', 'Please add at least one product or service.', 'error');
+      return;
+    }
+    setPrescribing(true);
+    try {
+      const token = Cookies.get('authToken');
+      const payload = {
+        patientId: selectedPatient.patientId,
+        prescriptions: cart.map(item => ({
+          type: item.type, // "product" or "service"
+          productId: item.type === 'product' ? item.id : null, // Only for products
+          serviceId: item.type === 'service' ? item.id : null, // Only for services
+          quantity: item.type === 'product' ? item.quantity : null, // Only for products
+        })),
+        comments: comments || null, // Include doctor's comments
+      };
+  
+      await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/prescriptions`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      Swal.fire('Success!', 'Prescription submitted successfully.', 'success');
+      handleClosePrescriptionModal();
+    } catch (error) {
+      Swal.fire('Error!', 'Failed to submit prescription.', 'error');
+    }
+    setPrescribing(false);
+  };
+  
   return (
-    <Box>
+    <div>
       <Typography variant="h6" gutterBottom>
         My Patients
       </Typography>
@@ -210,110 +159,111 @@ const handleClosePatientDetailsModal = () => {
                 <TableCell>CHF ID</TableCell>
                 <TableCell>Patient Name</TableCell>
                 <TableCell>Diagnosis</TableCell>
-                <TableCell>Status</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredPatients.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((patient) => (
+              {filteredPatients.map((patient) => (
                 <TableRow key={patient.patientId}>
                   <TableCell>{patient.chfId}</TableCell>
                   <TableCell>{patient.user.firstName} {patient.user.lastName}</TableCell>
                   <TableCell>{patient.cancer?.cancerName || 'N/A'}</TableCell>
-                  <TableCell>{patient.status?.status_details?.label || 'N/A'}</TableCell>
                   <TableCell>
-                  <IconButton onClick={() => handleOpenPatientDetailsModal(patient)} color="primary">
-    <Visibility />
-  </IconButton>
-  {patient.status.statusId !== 3 && ( 
-  <IconButton onClick={() => handleOpenAssignDoctorModal(patient)} color="primary">
-    <Edit />
-  </IconButton>
-)}
-
-</TableCell>
-
+                    <IconButton color="secondary" onClick={() => handleOpenPrescriptionModal(patient)}>
+                      <LocalPharmacy />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-          <TablePagination
-            component="div"
-            count={filteredPatients.length}
-            page={page}
-            onPageChange={(event, newPage) => setPage(newPage)}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={(event) => setRowsPerPage(parseInt(event.target.value, 10))}
-          />
         </TableContainer>
       )}
 
-      {/* Assign Care Plan Modal */}
-      <Dialog open={openAssignDoctorModal} onClose={handleCloseAssignDoctorModal}>
-        <DialogTitle>Assign Care Plan</DialogTitle>
+      {/* Prescription Modal */}
+      <Dialog open={openPrescriptionModal} onClose={handleClosePrescriptionModal} maxWidth="sm" fullWidth>
+        <DialogTitle>Prescribe Treatment for {selectedPatient?.user.firstName} {selectedPatient?.user.lastName}</DialogTitle>
         <DialogContent>
-          <TextField multiline rows={4}  label="Care Plan" fullWidth value={carePlan} onChange={(e) => setCarePlan(e.target.value)} style={{ marginBottom: '10px' }} />
-          <TextField label="Amount Recommended" fullWidth type="number" value={amountRecommended} onChange={(e) => setAmountRecommended(e.target.value)} style={{ marginBottom: '10px' }} />
-          <FormControlLabel control={<Checkbox checked={approved} onChange={(e) => setApproved(e.target.checked)} />} label="By clicking on this checkbox I recommend this patient for funding." />
-        </DialogContent>
+  {/* Product Selection & Quantity (Inline) */}
+  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
+    <FormControl style={{ flex: 1 }}>
+      <InputLabel>Product</InputLabel>
+      <Select value={selectedProduct} onChange={(e) => setSelectedProduct(e.target.value)} fullWidth>
+        {products.map((product) => (
+          <MenuItem key={product.productId} value={product.productId}>
+            {product.productName}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+    <TextField
+      type="number"
+      label="Qty"
+      value={quantity}
+      onChange={(e) => setQuantity(e.target.value)}
+      style={{ width: '80px' }} // Smaller width for quantity
+    />
+    <Button variant="contained" color="primary" onClick={handleAddProductToCart}>
+      Add
+    </Button>
+  </div>
+
+  {/* Service Selection (Separate Line) */}
+  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
+    <FormControl fullWidth>
+      <InputLabel>Service</InputLabel>
+      <Select value={selectedService} onChange={(e) => setSelectedService(e.target.value)}>
+        {services.map((service) => (
+          <MenuItem key={service.serviceId} value={service.serviceId}>
+            {service.serviceName}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+    <Button variant="contained" color="primary" onClick={handleAddServiceToCart}>
+      Add
+    </Button>
+  </div>
+
+  {/* Cart Table */}
+  <Table>
+    <TableBody>
+      {cart.map((item, index) => (
+        <TableRow key={index}>
+          <TableCell>{item.name}</TableCell>
+          <TableCell>{item.type === 'product' ? item.quantity : 'N/A'}</TableCell>
+          <TableCell>
+            <IconButton onClick={() => handleRemoveFromCart(index)}>
+              <Delete />
+            </IconButton>
+          </TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+
+  {/* Comment Box */}
+  <TextField
+    label="Doctor's Comments"
+    multiline
+    rows={3}
+    variant="outlined"
+    fullWidth
+    value={comments}
+    onChange={(e) => setComments(e.target.value)}
+    style={{ marginTop: '15px' }}
+  />
+</DialogContent>
+
         <DialogActions>
-          <Button onClick={handleCloseAssignDoctorModal}>Cancel</Button>
-          <Button variant="contained" color="primary" onClick={handleAssignCarePlan} disabled={assigning}>Approve</Button>
-          <Button variant="contained" color="error" onClick={handleDisapproveCarePlan} disabled={assigning}>Disapprove</Button>
+          <Button onClick={handleClosePrescriptionModal}>Cancel</Button>
+          {/* <Button variant="contained" color="primary" onClick={handleSubmitPrescription}>Submit</Button> */}
+          <Button variant="contained" color="primary" onClick={handleSubmitPrescription} disabled={prescribing}>
+                    {prescribing ? <CircularProgress size={24} color="inherit" /> : "Prescribe"}
+                    </Button>
         </DialogActions>
       </Dialog>
-
-{/* Patient Details Modal */}
-<Dialog open={openPatientDetailsModal} onClose={handleClosePatientDetailsModal} maxWidth="md" fullWidth>
-  <DialogTitle>Patient Details</DialogTitle>
-  <DialogContent>
-    {selectedPatientDetails && (
-      <Box>
-        <Typography variant="h6">Personal Information</Typography>
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell><strong>Name:</strong></TableCell>
-              <TableCell>{selectedPatientDetails.user.firstName} {selectedPatientDetails.user.lastName}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell><strong>CHF ID:</strong></TableCell>
-              <TableCell>{selectedPatientDetails.chfId}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell><strong>Diagnosis:</strong></TableCell>
-              <TableCell>{selectedPatientDetails.cancer?.cancerName || 'N/A'}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell><strong>Status:</strong></TableCell>
-              <TableCell>{selectedPatientDetails.status?.status_details?.label || 'N/A'}</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-
-        <Typography variant="h6" sx={{ mt: 2 }}>Care Plan</Typography>
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell><strong>Plan:</strong></TableCell>
-              <TableCell>{selectedPatientDetails.carePlan || 'No care plan assigned'}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell><strong>Amount Recommended:</strong></TableCell>
-              <TableCell>{selectedPatientDetails.amountRecommended || 'N/A'}</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </Box>
-    )}
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={handleClosePatientDetailsModal}>Close</Button>
-  </DialogActions>
-</Dialog>
-
-
-    </Box>
+    </div>
   );
 };
 

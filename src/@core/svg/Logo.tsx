@@ -75,10 +75,11 @@ const Logo = (props: SVGAttributes<SVGElement>) => {
     // <Image alt='Resilience Nigeria - National Cancer Health Fund' src={"/images/resilience-logo2.png"} width={"100%"} height={"100%"} />
     <Image 
   alt="Resilience Nigeria - National Cancer Health Fund"
-  src="/images/resilience-logo2.png"
-  layout="responsive"
-  width={100}
-  height={50} // Adjust aspect ratio accordingly
+  // src="/images/resilience-logo2.png"
+  src="/images/CHFLogo.svg"
+  // layout="responsive"
+  width={400}
+  height={100} // Adjust aspect ratio accordingly
 />
 
   )

@@ -384,6 +384,28 @@ const App = () => {
   permission: "dg_manage_analytics",
 },
 
+
+// Pharmacist Roles
+{
+  label: "Prescriptions",
+  icon: <i className="ri-capsule-fill"></i>,
+  href: "/dashboard/users/pharmacist/prescriptions",
+  permission: "pharmacist_manage_prescription",
+},
+{
+  label: "My Patient Billings",
+  icon: <i className="ri-shopping-bag-4-fill" />,
+  href: "/dashboard/doctor/patient/billings",
+  permission: "pharmacist_view_billings",
+},
+{
+  label: "Hospital Patient Billings",
+  icon: <i className="ri-shopping-bag-4-fill" />,
+  href: "/dashboard/pharmacist/prescriptions",
+  permission: "pharmacist_view_billings",
+},
+
+
     // {
     //   label: "Users",
     //   icon: <i className="ri-group-fill" />,

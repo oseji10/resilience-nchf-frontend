@@ -69,9 +69,9 @@ const Award = () => {
             {roleName} Dashboard
           </Typography>
           <Typography variant='h5'>Welcome back {name}! 🎉</Typography>
-          <Typography>
+          {/* <Typography>
             This dashboard lets you manage your patients, inventory, and patient encounters.
-          </Typography>
+          </Typography> */}
         </div>
       </CardContent>
     </Card>
