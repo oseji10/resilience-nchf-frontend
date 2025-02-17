@@ -493,8 +493,8 @@ useEffect(() => {
         Subhubs
       </Button>
     </TableCell>
-                <TableCell>{hospital?.wallet_balance ? `₦${hospital.wallet_balance.balance}` : 'N/A'}</TableCell>
-
+                <TableCell>{hospital?.wallet_balance ? `₦${Number(hospital.wallet_balance.balance).toLocaleString()}` : 'N/A'}</TableCell>
+                {/* ₦{Number(balance).toLocaleString()} */}
   {/* <TableCell>
   {!hospital?.hospital_admin?.firstName && !hospital?.hospital_admin?.lastName && (
     <Button onClick={() => handleAssignAdminModal(hospital.hospitalId)}>

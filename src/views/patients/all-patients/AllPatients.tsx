@@ -330,9 +330,9 @@ const handleSubmit = async (event) => {
       {/* Header with aligned button */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h3>Patients</h3>
-        <Button variant="contained" color="primary" onClick={handleOpenModal}>
+        {/* <Button variant="contained" color="primary" onClick={handleOpenModal}>
           New Patient
-        </Button>
+        </Button> */}
       </div>
       <TextField
         placeholder="Search by name"
@@ -347,10 +347,10 @@ const handleSubmit = async (event) => {
           <TableHead>
             <TableRow>
               <TableCell>Patient Name</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Patient Type</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Cost</TableCell>
+              <TableCell>Hospital</TableCell>
+              <TableCell>State of Origin</TableCell>
+              <TableCell>Phone</TableCell>
+              <TableCell>Doctor</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -359,12 +359,12 @@ const handleSubmit = async (event) => {
               <TableRow key={patient.id}>
                 
                 <TableCell>
-                  {patient?.patientName} 
+                  {patient?.user?.firstName} {patient?.user?.lastName} 
                 </TableCell>
-                <TableCell>{patient?.patientDescription}</TableCell>
-                <TableCell>{patient?.patientType}</TableCell>
-                <TableCell>{patient?.patientCategory}</TableCell>
-                <TableCell>₦{patient?.patientCost ? new Intl.NumberFormat().format(patient.patientCost) : "N/A"}</TableCell>
+                <TableCell>{patient?.hospital?.hospitalShortName}</TableCell>
+                <TableCell>{patient?.state_of_origin?.stateName}</TableCell>
+                <TableCell>{patient?.user?.phoneNumber}</TableCell>
+                <TableCell>{patient?.doctor?.firstName} {patient?.user?.lastName}</TableCell>
                 
   
 

@@ -21,7 +21,7 @@ import { useRouter } from 'next/navigation'
 // SweetAlert2 Import
 import Swal from 'sweetalert2'
 import Logo from '@/@core/svg/Logo'
-
+import themeConfig from '@/configs/themeConfig'
 // Register Component
 const Register = () => {
   // Form state
@@ -158,13 +158,14 @@ const Register = () => {
               </Grid>
             </Grid>
 
-            <Button fullWidth variant='contained'  type='submit' disabled={loading} className='mt-4'>
+            <Button fullWidth variant='contained' color='secondary'  type='submit' disabled={loading} className='mt-4'>
               {loading ? 'Submitting...' : 'Start Application'}
             </Button>
 
+
             <div className='flex justify-center items-center flex-wrap gap-2 mt-4'>
               <Typography>Already have an account?</Typography>
-              <Typography component={Link} href='/login' color='primary' className='font-semibold'>
+              <Typography component={Link} href='/login' color='secondary' className='font-semibold'>
                 Sign in instead
               </Typography>
             </div>
