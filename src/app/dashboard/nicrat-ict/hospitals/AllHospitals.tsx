@@ -489,7 +489,7 @@ useEffect(() => {
                 {/* <TableCell>{hospital?.state?.zone?.zoneName}</TableCell>
                 <TableCell>{hospital?.state?.stateName}</TableCell> */}
            <TableCell>
-      <Button onClick={() => router.push(`/dashboard/nicrat-ict/subhubs?hospitalId=${hospital?.hospitalId}`)}>
+      <Button onClick={() => router.push(`/dashboard/nicrat-ict/subhubs?hospitalName=${hospital?.hospitalName}&hospitalId=${hospital?.hospitalId}`)}>
         Subhubs
       </Button>
     </TableCell>

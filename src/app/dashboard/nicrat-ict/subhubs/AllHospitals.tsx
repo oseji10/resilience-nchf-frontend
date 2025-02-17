@@ -381,7 +381,7 @@ useEffect(() => {
       Back
     </Button>
     <Button variant="contained" color="primary" onClick={handleOpenModal}>
-      New Hub
+      New SubHub
     </Button>
   </div>
 </div>
@@ -458,7 +458,7 @@ useEffect(() => {
 
 {/* Modal for New Hospital */}
 <Dialog open={openModal} onClose={handleCloseModal} fullWidth maxWidth="sm">
-      <DialogTitle>Add New Hospital</DialogTitle>
+      <DialogTitle>Add New SubHub</DialogTitle>
       <DialogContent>
         <form onSubmit={(e) => handleSubmit(e, formData)}>
           <TextField
