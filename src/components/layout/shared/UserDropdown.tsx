@@ -31,6 +31,12 @@ const BadgeContentSpan = styled('span')({
   boxShadow: '0 0 0 2px var(--mui-palette-background-paper)'
 })
 
+ const token = Cookies.get("authToken");
+
+  if (!token || token === "null" || token === "undefined") {
+    window.location.href = "/login";  // Proper redirection
+  }
+  
 const UserDropdown = () => {
   // States
   const [open, setOpen] = useState(false)
@@ -65,20 +71,34 @@ const UserDropdown = () => {
 
   const getRoleName = (role) => {
     switch (role) {
+      case "1":
+        return "Patient";
       case "2":
-        return "Clinic Receptionist";
-      case "3":
-        return "Frontdesk Receptionist";
-      case "4":
         return "Doctor";
+      case "3":
+        return "Social Welfare";
+      case "4":
+        return "MDT";
       case "5":
-        return "Workshop Receptionist";
+        return "Other Staff";
         case "6":
-        return "Nurse";
+        return "Hospital Admin";
         case "7":
-        return "Admin";
+        return "CMD";
         case "8":
-        return "Super Admin";
+        return "NICRAT DESK";
+        case "9":
+        return "NICRAT F&A";
+        case "10":
+        return "NICRAT ICT";
+        case "11":
+        return "NICRAT DG";
+        case "12":
+        return "SUPER ADMIN";
+        case "13":
+        return "PHARMACIST";
+        case "14":
+        return "NURSE";
       default:
         return "Unknown Role"; 
     }

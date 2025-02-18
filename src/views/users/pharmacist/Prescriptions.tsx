@@ -94,6 +94,9 @@ const PrescriptionsTable = () => {
           prescriptionId: item.prescriptionId,
           dispensedQuantity: item.dispensedQuantity, 
         })),
+        // prescriptionId: prescriptions?.patient?.prescriptionId, 
+        prescriptionId: selectedPatient?.prescriptionId,
+
       };
   
       // console.log("Payload to send:", payload); // Debugging
@@ -175,7 +178,7 @@ const PrescriptionsTable = () => {
   {prescriptions.map((item, index) => (
     <TableRow key={item.prescriptionId}>
       <TableCell>{item?.product?.productName || item.serviceName}</TableCell>
-      <TableCell>{item.quantity}</TableCell>
+      <TableCell>{item?.quantity}</TableCell>
       <TableCell>
         {item.stock_available > 0 ? item.stock_available : (
           <Typography color="error">Out of Stock</Typography>

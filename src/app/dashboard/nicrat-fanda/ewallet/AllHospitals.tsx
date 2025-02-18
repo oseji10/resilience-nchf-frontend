@@ -161,7 +161,6 @@ const [formData, setFormData] = useState({
 
   const [poolBalance, setPoolBalance] = useState<number | null>(null); // State for pool balance
 
-
   useEffect(() => {
     const fetchHospitals = async () => {
       try {
@@ -179,26 +178,25 @@ const [formData, setFormData] = useState({
         setLoading(false);
       }
     };
-
+  
     const fetchPoolBalance = async () => {
       try {
         const token = Cookies.get('authToken');
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/pool/balance`,{
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/pool/balance`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-      });
-        setPoolBalance(response.data.balance); // Assuming the balance is returned in the response body as `balance`
+        });
+        setPoolBalance(response.data.balance);
       } catch (error) {
         console.error('Error fetching pool balance:', error);
       }
     };
-
+  
     fetchHospitals();
-    fetchPoolBalance(); // Fetch the pool balance on component mount
-  }, []);
-
-
+    fetchPoolBalance();
+  }, [updateTrigger]); // ✅ Correct dependency array
+  
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
@@ -302,6 +300,7 @@ const [formData, setFormData] = useState({
         setPoolBalance(response.data.newBalance); // Update the pool balance instantly
         Swal.fire('Success', 'Pool account credited successfully!', 'success');
         setOpenTopUpModal(false);
+        setUpdateTrigger((prev) => !prev);
       } else {
         Swal.fire('Error', 'Failed to credit the pool account. Please try again.', 'error');
       }
@@ -449,77 +448,88 @@ const [formData, setFormData] = useState({
 
     {selectedHospital && (
       <form
-        onSubmit={async (e) => {
-          e.preventDefault(); // Prevent default form submission
-
-          if (updateLoading) return; // Prevent multiple clicks
-          setUpdateLoading(true);
-
-          try {
-            const token = Cookies.get("authToken");
-            const formData = {amount: selectedHospital.amount, comments: selectedHospital.comments, hospitalId: selectedHospital.hospitalId}
-            const response = await axios.put(
-              `${process.env.NEXT_PUBLIC_APP_URL}/hospitals/${selectedHospital.hospitalId}/ewallet`,
-              formData,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-
-            if (response.status === 200 || response.status === 201) {
-              const updatedHospital = response.data; // ✅ Use response.data with Axios
-
-            // ✅ Ensure hospital list updates immediately
-      setHospitals((prevHospitals) => {
-        const updated = prevHospitals.map((hospital) =>
-          hospital.hospitalId === updatedHospital.hospitalId ? updatedHospital : hospital
-        );
-        console.log('Updated Hospitals:', updated);
-        return updated;
-      });
-
-      setFilteredHospitals((prevFiltered) => {
-        const updated = prevFiltered.map((hospital) =>
-          hospital.hospitalId === updatedHospital.hospitalId ? updatedHospital : hospital
-        );
-        console.log('Updated Filtered Hospitals:', updated);
-        return updated;
-      });
-
+      onSubmit={async (e) => {
+        e.preventDefault(); // Prevent default form submission
+      
+        if (updateLoading) return; // Prevent multiple clicks
+        setUpdateLoading(true);
+      
+        try {
+          const token = Cookies.get("authToken");
+          const formData = {
+            amount: selectedHospital.amount,
+            comments: selectedHospital.comments,
+            hospitalId: selectedHospital.hospitalId,
+          };
+      
+          const response = await axios.put(
+            `${process.env.NEXT_PUBLIC_APP_URL}/hospitals/${selectedHospital.hospitalId}/ewallet`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+      
+          // Ensure response contains a success message before proceeding
+          if (response.status === 200 || response.status === 201) {
+            if (response.data?.success) {
+              const updatedHospital = response.data; // ✅ Use response.data
+      
+              // ✅ Ensure hospital list updates immediately
+              setHospitals((prevHospitals) => {
+                const updated = prevHospitals.map((hospital) =>
+                  hospital.hospitalId === updatedHospital.hospitalId ? updatedHospital : hospital
+                );
+                console.log("Updated Hospitals:", updated);
+                return updated;
+              });
+      
+              setFilteredHospitals((prevFiltered) => {
+                const updated = prevFiltered.map((hospital) =>
+                  hospital.hospitalId === updatedHospital.hospitalId ? updatedHospital : hospital
+                );
+                console.log("Updated Filtered Hospitals:", updated);
+                return updated;
+              });
+      
               // ✅ Close modal BEFORE showing success message
               setOpenEditModal(false);
-              setUpdateLoading(false);
-
+      
               Swal.fire({
                 title: "Success!",
-                text: "Hospital ewallet updated successfully!",
+                text: response.data.success || "Hospital ewallet updated successfully!",
                 icon: "success",
                 confirmButtonText: "Okay",
               });
+              setUpdateTrigger((prev) => !prev);
             } else {
-              Swal.fire({
-                title: "Error!",
-                text: `Unexpected response: ${response.status}`,
-                icon: "error",
-                confirmButtonText: "Try Again",
-              });
+              throw new Error(response.data?.error || "Unknown error occurred.");
             }
-          } catch (error) {
-            console.error("Error updating hospital ewallet:", error);
-
-            Swal.fire({
-              title: "Oops!",
-              text: error.response?.data?.message || "An error occurred.",
-              icon: "error",
-              confirmButtonText: "Okay",
-            });
-          } finally {
-            setUpdateLoading(false); 
+          } else {
+            throw new Error(`Unexpected response: ${response.status}`);
           }
-        }}
+        } catch (error) {
+          console.error("Error updating hospital ewallet:", error);
+      
+          // Extract error message from backend response
+          const errorMessage = error.response?.data?.error || error.message || "An error occurred.";
+          setOpenEditModal(false);
+
+      
+          Swal.fire({
+            title: "Oops!",
+            text: errorMessage,
+            icon: "error",
+            confirmButtonText: "Okay",
+          });
+        } finally {
+          setUpdateLoading(false);
+        }
+      }}
+      
       >
         <h4>Hospital: {selectedHospital?.hospitalName}</h4>
         <h4>Current Balance: ₦{selectedHospital?.wallet_balance?.balance}</h4>

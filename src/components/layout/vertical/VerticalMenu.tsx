@@ -12,8 +12,10 @@ import StyledVerticalNavExpandIcon from "@/@menu/styles/vertical/StyledVerticalN
 
 const VerticalMenu = ({ filteredMenu }) => {
   const [openSubmenu, setOpenSubmenu] = useState(null);
+  
   const theme = useTheme();
   const router = useRouter();
+
 
   const toggleSubmenu = (index) => {
     setOpenSubmenu(openSubmenu === index ? null : index);
@@ -23,7 +25,13 @@ const VerticalMenu = ({ filteredMenu }) => {
   const ScrollWrapper = isBreakpointReached ? "div" : PerfectScrollbar;
   // const ScrollWrapper = isBreakpointReached && window.innerWidth <= 768 ? "div" : PerfectScrollbar;
 
+  const token = Cookies.get("authToken");
 
+  if (!token || token === "null" || token === "undefined") {
+    window.location.href = "/login";  // Proper redirection
+  }
+  
+  
   return (
     <ScrollWrapper
       {...(isBreakpointReached
@@ -44,6 +52,7 @@ const VerticalMenu = ({ filteredMenu }) => {
         renderExpandedMenuItemIcon={{ icon: <i className="ri-circle-line" /> }}
         menuSectionStyles={menuSectionStyles(theme)}
       >
+        
         <MenuSection label="Dashboard">
           {filteredMenu.map((item, index) => (
             <div key={index}>
@@ -63,12 +72,24 @@ const VerticalMenu = ({ filteredMenu }) => {
                     ))}
                 </SubMenu>
               ) : (
-                <MenuItem component="a" href={item.href}>
-  <Box display="flex" alignItems="center" gap={1}>
-    {item.icon}
-    <Typography variant="body2">{item.label}</Typography>
-  </Box>
-</MenuItem>
+//                 <MenuItem 
+//                 component="a" href={item.href}>
+//   <Box display="flex" alignItems="center" gap={1}>
+//     {item.icon}
+//     <Typography variant="body2">{item.label}</Typography>
+//   </Box>
+// </MenuItem>
+<MenuItem
+                    component="button"
+                    onClick={() =>
+                      item.modal ? setModalOpen(true) : router.push(item.href)
+                    }
+                  >
+                    <Box display="flex" alignItems="center" gap={1}>
+                      {item.icon}
+                      <Typography variant="body2">{item.label}</Typography>
+                    </Box>
+                  </MenuItem>
 
               )}
             </div>
@@ -232,9 +253,18 @@ const App = () => {
     {
       label: "Billings",
       icon: <i className="ri-shopping-bag-4-fill" />,
-      href: "/dashboard/patient-billing-history",
+      href: "/dashboard/users/hospital-admin/billings",
       permission: "hospital_admin_view_patients_billings",
     },
+
+    {
+      label: "Generate Invoice",
+      icon: <i className="ri-receipt-fill" />,
+      href: "/dashboard/users/hospital-admin/billings",
+      // modal: true,
+      permission: "hospital_admin_view_patients_billings",
+    },
+
 
     {
       label: "Manage Users",
