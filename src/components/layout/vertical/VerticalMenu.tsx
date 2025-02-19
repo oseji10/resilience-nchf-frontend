@@ -154,7 +154,7 @@ const App = () => {
     {
       label: "Billings",
       icon: <i className="ri-shopping-bag-4-fill" />,
-      href: "/dashboard/patient-billing-history",
+      href: "/dashboard/users/patient/billings",
       permission: "patient_billing_history",
     },
 
@@ -177,12 +177,12 @@ const App = () => {
       href: "/dashboard/users/doctor/pending",
       permission: "doctor_manage_patients",
     },
-    {
-      label: "Patient Billings",
-      icon: <i className="ri-shopping-bag-4-fill" />,
-      href: "/dashboard/doctor/patient/billings",
-      permission: "doctor_manage_billings",
-    },
+    // {
+    //   label: "Patient Billings",
+    //   icon: <i className="ri-shopping-bag-4-fill" />,
+    //   href: "/dashboard/doctor/patient/billings",
+    //   permission: "doctor_manage_billings",
+    // },
     {
       label: "Prescriptions",
       icon: <i className="ri-capsule-fill"></i>,

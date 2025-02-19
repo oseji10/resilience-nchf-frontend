@@ -43,6 +43,7 @@ const DoctorPendingPatientsTable = () => {
   const [openAssignDoctorModal, setOpenAssignDoctorModal] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [carePlan, setCarePlan] = useState('');
+  const [cancerStage, setCancerStage] = useState('');
   const [amountRecommended, setAmountRecommended] = useState('');
   const [approved, setApproved] = useState(false);
   const [page, setPage] = useState(0);
@@ -107,6 +108,7 @@ const DoctorPendingPatientsTable = () => {
           carePlan,
           amountRecommended,
           status: 'approved',
+          cancerStage,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -150,6 +152,7 @@ const DoctorPendingPatientsTable = () => {
               carePlan,
               amountRecommended,
               status: 'disapproved',
+              cancerStage,
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );
@@ -236,6 +239,7 @@ const DoctorPendingPatientsTable = () => {
         <DialogContent>
           <TextField multiline rows={4} label="Care Plan" fullWidth value={carePlan} onChange={(e) => setCarePlan(e.target.value)} style={{ marginBottom: '10px' }} />
           <TextField label="Amount Recommended" fullWidth type="number" value={amountRecommended} onChange={(e) => setAmountRecommended(e.target.value)} style={{ marginBottom: '10px' }} />
+          <TextField label="Amount Recommended" fullWidth type="number" value={cancerStage} onChange={(e) => setCancerStage(e.target.value)} style={{ marginBottom: '10px' }} />
           <FormControlLabel control={<Checkbox checked={approved} onChange={(e) => setApproved(e.target.checked)} />} label="By clicking on this checkbox I recommend this patient for funding." />
         </DialogContent>
         <DialogActions>

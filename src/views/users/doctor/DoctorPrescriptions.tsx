@@ -6,7 +6,7 @@ import {
   CircularProgress, Typography, TextField, IconButton, Dialog, DialogTitle,
   DialogContent, DialogActions, Button
 } from '@mui/material';
-import { LocalPharmacy, Delete } from '@mui/icons-material';
+import { LocalPharmacy, Delete, Visibility } from '@mui/icons-material';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import Cookies from 'js-cookie';
@@ -151,7 +151,7 @@ const DoctorPrescriptionsTable = () => {
                   <TableCell>{patient?.patient?.cancer?.cancerName || 'N/A'}</TableCell>
                   <TableCell>
                     <IconButton color="secondary" onClick={() => handleOpenPrescriptionModal(patient)}>
-                      <LocalPharmacy />
+                      <Visibility />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -163,15 +163,15 @@ const DoctorPrescriptionsTable = () => {
 
       {/* Prescription Modal */}
       <Dialog open={openPrescriptionModal} onClose={handleClosePrescriptionModal} maxWidth="sm" fullWidth>
-        <DialogTitle>Dispense Prescription for {selectedPatient?.patient?.user?.firstName} {selectedPatient?.patient?.user?.lastName}</DialogTitle>
+        <DialogTitle>Prescription for {selectedPatient?.patient?.user?.firstName} {selectedPatient?.patient?.user?.lastName}</DialogTitle>
         <DialogContent>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Item</TableCell>
                 <TableCell>Prescribed Qty</TableCell>
-                <TableCell>Stock</TableCell>
-                <TableCell>Dispense</TableCell>
+                {/* <TableCell>Stock</TableCell>
+                <TableCell>Dispense</TableCell> */}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -179,7 +179,7 @@ const DoctorPrescriptionsTable = () => {
     <TableRow key={item.prescriptionId}>
       <TableCell>{item?.product?.productName || item.serviceName}</TableCell>
       <TableCell>{item?.quantity}</TableCell>
-      <TableCell>
+      {/* <TableCell>
         {item.stock_available > 0 ? item.stock_available : (
           <Typography color="error">Out of Stock</Typography>
         )}
@@ -196,7 +196,7 @@ const DoctorPrescriptionsTable = () => {
           style={{ width: '60px' }}
           disabled={item.stock_available <= 0} // Disable input if out of stock
         />
-      </TableCell>
+      </TableCell> */}
     </TableRow>
   ))}
 </TableBody>
@@ -205,14 +205,14 @@ const DoctorPrescriptionsTable = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClosePrescriptionModal}>Cancel</Button>
-          <Button
+          {/* <Button
             variant="contained"
             color="primary"
             onClick={handleDispensePrescription}
             disabled={dispensing}
           >
             {dispensing ? <CircularProgress size={24} color="inherit" /> : "Dispense"}
-          </Button>
+          </Button> */}
         </DialogActions>
       </Dialog>
     </div>

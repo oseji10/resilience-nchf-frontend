@@ -114,7 +114,7 @@ const Login = () => {
           <div className='flex flex-col gap-5'>
             <div>
               {/* <Typography variant='h6'>{`This is the National Cancer Health Fund Portal!👋🏻`}</Typography> */}
-              <Typography className='mbs-1'>Please sign-in to your account with your email or phone number and password</Typography>
+              <Typography className='mbs-1' align='center'>Please sign-in to your account with your email or phone number and password</Typography>
             </div>
             {/* {errorMessage && <Typography color='error'>{errorMessage}</Typography>}
             {successMessage && <Typography color='primary'>{successMessage}</Typography>} */}
@@ -174,7 +174,7 @@ const Login = () => {
               />
               <div className='flex justify-between items-center gap-x-3 gap-y-1 flex-wrap'>
                 {/* <FormControlLabel control={<Checkbox />} label='Remember me' /> */}
-                <Typography className='text-end' color='secondary' component={Link} href='/start-application'>
+                <Typography className='text-end' color='red' component={Link} href='/start-application'>
                   Apply Here
                 </Typography>
                 <Typography className='text-end' color='primary' component={Link} href='/forgot-password'>
