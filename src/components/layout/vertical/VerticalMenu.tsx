@@ -186,7 +186,7 @@ const App = () => {
     {
       label: "Prescriptions",
       icon: <i className="ri-capsule-fill"></i>,
-      href: "/dashboard/patient-billing-history",
+      href: "/dashboard/users/doctor/prescriptions",
       permission: "doctor_manage_prescriptions",
     },
 
@@ -258,7 +258,7 @@ const App = () => {
     },
 
     {
-      label: "Generate Invoice",
+      label: "Generated Invoices",
       icon: <i className="ri-receipt-fill" />,
       href: "/dashboard/users/hospital-admin/billings",
       // modal: true,
@@ -403,14 +403,14 @@ const App = () => {
 {
   label: "E-wallets",
   icon: <i className="ri-wallet-fill" />,
-  href: "/dashboard/users/nicrat/invoices",
+  href: "/dashboard/nicrat-fanda/ewallet",
   permission: "dg_manage_ewallets",
 },
 
 {
   label: "Analytics",
   icon: <i className="ri-pie-chart-2-fill" />,
-  href: "/dashboard/users/nicrat/invoices",
+  href: "/dashboard/users/nicrat/analytics",
   permission: "dg_manage_analytics",
 },
 

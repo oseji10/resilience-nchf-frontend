@@ -29,7 +29,7 @@ const PrescriptionsTable = () => {
     const fetchPatients = async () => {
       try {
         const token = Cookies.get('authToken');
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/hospital/prescriptions`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/hospital/prescriptions/pending`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setPatients(response.data);

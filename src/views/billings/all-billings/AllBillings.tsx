@@ -66,6 +66,8 @@ const BillingsTable = () => {
   const [endDate, setEndDate] = useState('');
   const [openInvoiceModal, setOpenInvoiceModal] = useState(false);
 
+  const [submitDownloading, setDownloading] = useState(false);
+
   const [openEditModal, setOpenEditModal] = useState<boolean>(false);
   const router = useRouter();
 
@@ -164,6 +166,7 @@ const BillingsTable = () => {
 
   const handleGenerateInvoice = async () => {
     try {
+      setDownloading(true);
       const token = Cookies.get('authToken');
       const response = await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/generate-invoice`,
         { startDate, endDate },
@@ -177,6 +180,7 @@ const BillingsTable = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      setDownloading(false);
     } catch (error) {
       Swal.fire('Error', 'Failed to generate invoice', 'error');
     }
@@ -270,7 +274,7 @@ const BillingsTable = () => {
                       borderRadius: "4px",
                     }}
                   >
-                    {billing.paymentStatus === "pending" ? "PENDING" : "PAID"}
+                    {billing.paymentStatus === "pending" ? "PENDING" : "COMPLETED"}
                   </span>
                 </TableCell>
                 <TableCell>
@@ -308,8 +312,11 @@ const BillingsTable = () => {
           <Typography variant="h6">Generate Invoice</Typography>
           <TextField label="Start Date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} fullWidth margin="normal" InputLabelProps={{ shrink: true }} />
           <TextField label="End Date" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} fullWidth margin="normal" InputLabelProps={{ shrink: true }} />
-          <Button variant="contained" color="primary" fullWidth onClick={handleGenerateInvoice} sx={{ mt: 2 }}>
+          {/* <Button variant="contained" color="primary" fullWidth onClick={handleGenerateInvoice} sx={{ mt: 2 }}>
             Download Invoice
+          </Button> */}
+          <Button type="submit" variant="contained" color="primary" disabled={submitDownloading} onClick={handleGenerateInvoice} sx={{ mt: 2 }}>
+                        {submitDownloading ? <CircularProgress size={24} color="inherit" /> : "Donwload invoice"}
           </Button>
         </Box>
       </Modal>

@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
 
 // Next Imports
@@ -20,7 +20,8 @@ import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
 import MenuItem from '@mui/material/MenuItem'
 import Button from '@mui/material/Button'
-import Cookies from 'js-cookie';
+import Cookies from 'js-cookie'
+
 // Styled component for badge content
 const BadgeContentSpan = styled('span')({
   width: 8,
@@ -31,24 +32,28 @@ const BadgeContentSpan = styled('span')({
   boxShadow: '0 0 0 2px var(--mui-palette-background-paper)'
 })
 
- const token = Cookies.get("authToken");
-
-  if (!token || token === "null" || token === "undefined") {
-    window.location.href = "/login";  // Proper redirection
-  }
-  
 const UserDropdown = () => {
-  // States
   const [open, setOpen] = useState(false)
-
-  // Refs
+  const [token, setToken] = useState<string | null>(null)
+  const [role, setRole] = useState<string | null>(null)
+  const [name, setName] = useState<string | null>(null)
+  
+  const router = useRouter()
   const anchorRef = useRef<HTMLDivElement>(null)
 
-  // Hooks
-  const router = useRouter()
+  useEffect(() => {
+    const authToken = Cookies.get("authToken")
+    if (!authToken || authToken === "null" || authToken === "undefined") {
+      router.push("/login") // Redirect if not authenticated
+    } else {
+      setToken(authToken)
+      setRole(Cookies.get("role") || "")
+      setName(Cookies.get("name") || "")
+    }
+  }, [router])
 
   const handleDropdownOpen = () => {
-    !open ? setOpen(true) : setOpen(false)
+    setOpen(!open)
   }
 
   const handleDropdownClose = (event?: MouseEvent<HTMLLIElement> | (MouseEvent | TouchEvent), url?: string) => {
@@ -63,62 +68,37 @@ const UserDropdown = () => {
     setOpen(false)
   }
 
-
-  
-  const role = Cookies.get('role');
-  const name = Cookies.get('name')
-
-
-  const getRoleName = (role) => {
+  const getRoleName = (role: string | null) => {
     switch (role) {
-      case "1":
-        return "Patient";
-      case "2":
-        return "Doctor";
-      case "3":
-        return "Social Welfare";
-      case "4":
-        return "MDT";
-      case "5":
-        return "Other Staff";
-        case "6":
-        return "Hospital Admin";
-        case "7":
-        return "CMD";
-        case "8":
-        return "NICRAT DESK";
-        case "9":
-        return "NICRAT F&A";
-        case "10":
-        return "NICRAT ICT";
-        case "11":
-        return "NICRAT DG";
-        case "12":
-        return "SUPER ADMIN";
-        case "13":
-        return "PHARMACIST";
-        case "14":
-        return "NURSE";
-      default:
-        return "Unknown Role"; 
+      case "1": return "Patient"
+      case "2": return "Doctor"
+      case "3": return "Social Welfare"
+      case "4": return "MDT"
+      case "5": return "Other Staff"
+      case "6": return "Hospital Admin"
+      case "7": return "CMD"
+      case "8": return "NICRAT DESK"
+      case "9": return "NICRAT F&A"
+      case "10": return "NICRAT ICT"
+      case "11": return "NICRAT DG"
+      case "12": return "SUPER ADMIN"
+      case "13": return "PHARMACIST"
+      case "14": return "NURSE"
+      default: return "Unknown Role"
     }
-  };
-  
-  
-  const roleName = getRoleName(role);
+  }
 
-  
-    const handleLogout = () => {
-      Cookies.remove('name');
-      Cookies.remove('email');
-      Cookies.remove('firstName');
-      Cookies.remove('lastName');
-      Cookies.remove('phoneNumber');
-      Cookies.remove('authToken');
-      Cookies.remove('role');
-      router.push('/login');
-    };
-    
+  const handleLogout = () => {
+    Cookies.remove('name')
+    Cookies.remove('email')
+    Cookies.remove('firstName')
+    Cookies.remove('lastName')
+    Cookies.remove('phoneNumber')
+    Cookies.remove('authToken')
+    Cookies.remove('role')
+    router.push('/login')
+  }
+
   return (
     <>
       <Badge
@@ -160,28 +140,16 @@ const UserDropdown = () => {
                       <Typography className='font-medium' color='text.primary'>
                         {name}
                       </Typography>
-                      <Typography variant='caption'>{roleName}</Typography>
+                      <Typography variant='caption'>{getRoleName(role)}</Typography>
                     </div>
                   </div>
                   <Divider className='mlb-1' />
-                  <a href='/dashboard/profile'><MenuItem className='gap-3' 
-                  // onClick={e => handleDropdownClose(e)}
-                  >
-                    <i className='ri-user-3-line' />
-                    <Typography color='text.primary'>Edit Profile</Typography>
-                  </MenuItem></a>
-                  {/* <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
-                    <i className='ri-settings-4-line' />
-                    <Typography color='text.primary'>Settings</Typography>
-                  </MenuItem>
-                  <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
-                    <i className='ri-money-dollar-circle-line' />
-                    <Typography color='text.primary'>Pricing</Typography>
-                  </MenuItem>
-                  <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
-                    <i className='ri-question-line' />
-                    <Typography color='text.primary'>FAQ</Typography>
-                  </MenuItem> */}
+                  <a href='/dashboard/profile'>
+                    <MenuItem className='gap-3'>
+                      <i className='ri-user-3-line' />
+                      <Typography color='text.primary'>Edit Profile</Typography>
+                    </MenuItem>
+                  </a>
                   <div className='flex items-center plb-2 pli-4'>
                     <Button
                       fullWidth
@@ -189,7 +157,6 @@ const UserDropdown = () => {
                       color='error'
                       size='small'
                       endIcon={<i className='ri-logout-box-r-line' />}
-                      // onClick={e => handleDropdownClose(e, '/')}
                       onClick={handleLogout}
                       sx={{ '& .MuiButton-endIcon': { marginInlineStart: 1.5 } }}
                     >

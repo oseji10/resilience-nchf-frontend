@@ -172,7 +172,7 @@ const DoctorPendingPatientsTable = () => {
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        Patients Penidng Review
+        Patients Pending Review
       </Typography>
       <TextField
         label="Search Patients"
