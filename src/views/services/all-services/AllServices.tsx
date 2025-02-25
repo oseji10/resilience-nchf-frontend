@@ -78,6 +78,8 @@ const formatDate = (dateString: string) => {
 
 const ServicesTable = () => {
   const [services, setServices] = useState<Service[]>([]);
+  const [hospitals, setHospitals] = useState([]);
+  const [selectedHospital, setSelectedHospital] = useState("");
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -98,21 +100,22 @@ const router = useRouter();
   const [formData, setFormData] = useState({
     serviceName: "",
     serviceDescription: "",
-    serviceType: "",
-    serviceCategory: "",
-    serviceQuantity: "",
+    // serviceType: "",
+    // serviceCategory: "",
+    // serviceQuantity: "",
     serviceCost: "",
     servicePrice: "",
     serviceStatus: "available",
     serviceImage: "",
     serviceManufacturer: "",
     uploadedBy: "",
+    hospitalId: selectedHospital,
   });
 
   const serviceType = [
-    'Proceedure',
-    'Investigation',
-    'Diagnosis',
+    'Radiotherapy',
+    'Physiotherapy',
+    'Conultancy',
     'Surgery',
   ];
 
@@ -142,14 +145,70 @@ const router = useRouter();
   };
 
 
+  useEffect(() => {
+    const fetchHospitals = async () => {
+      try {
+        const token = Cookies.get("authToken");
+        if (!token) {
+          console.warn("No auth token found.");
+          return;
+        }
+  
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/hospitals`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+  
+        if (Array.isArray(response.data)) {
+          setHospitals(response.data);
+        } else {
+          console.warn("Unexpected response format:", response.data);
+          setHospitals([]);
+        }
+      } catch (error) {
+        console.error("Error fetching hospitals:", error);
+      }
+    };
+  
+    if (openModal) {
+      fetchHospitals();
+    }
+
+    return () => {
+      setHospitals([]); // Reset if needed when modals close
+    };
+  }, [openModal]);
+  
+
   // Handle form submission
   // const [loading, setLoading] = useState(true); // For fetching services
 const [submitLoading, setSubmitLoading] = useState(false); // For form submission
+
+const handleHospitalChange = (event) => {
+  const value = event.target.value;
+  setSelectedHospital(value);
+
+  setFormData((prevData) => ({
+    ...prevData,
+    hospitalId: value, // Ensure hospitalId is updated
+  }));
+};
+
 const handleSubmit = async (event) => {
   event.preventDefault();
+  if (!selectedHospital) {
+    Swal.fire("Error!", "Please select a hospital", "error");
+    return;
+  }
 
   if (submitLoading) return; // Prevent multiple clicks
   setSubmitLoading(true);
+
+  const finalPayload = {
+    ...formData,
+    hospitalId: selectedHospital, // Ensure hospitalId is included
+  };
+
+  console.log("Final Payload:", finalPayload); // Debugging: Check if hospitalId is included
 
   try {
     const token = Cookies.get("authToken");
@@ -159,11 +218,11 @@ const handleSubmit = async (event) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify(finalPayload),
     });
 
     if (response.status === 201) {
-      const newService = await response.json(); 
+      const newService = await response.json();
 
       setServices((prevServices) => [newService, ...prevServices]);
       setFilteredServices((prevFiltered) => [newService, ...prevFiltered]);
@@ -171,29 +230,24 @@ const handleSubmit = async (event) => {
       setFormData({
         serviceName: "",
         serviceDescription: "",
-        serviceType: "",
-        serviceCategory: "",
-        serviceQuantity: "",
         serviceCost: "",
         servicePrice: "",
         serviceStatus: "available",
         serviceImage: "",
         serviceManufacturer: "",
         uploadedBy: "",
+        hospitalId: "", // Reset after submission
       });
 
-      // Close modal and stop loading BEFORE showing the alert
       setOpenModal(false);
       setSubmitLoading(false);
 
-      // Show success message
       Swal.fire({
         title: "Success!",
         text: "Service added successfully!",
         icon: "success",
         confirmButtonText: "Okay",
       });
-
     } else {
       throw new Error("Failed to add service.");
     }
@@ -206,13 +260,12 @@ const handleSubmit = async (event) => {
       confirmButtonText: "Okay",
     });
   } finally {
-    setSubmitLoading(false); // Ensure spinner stops in case of success or error
+    setSubmitLoading(false);
   }
 };
 
 
-
-  useEffect(() => {
+useEffect(() => {
     const fetchServices = async () => {
       try {
         const token = Cookies.get('authToken');
@@ -348,8 +401,8 @@ const handleSubmit = async (event) => {
             <TableRow>
               <TableCell>Service Name</TableCell>
               <TableCell>Description</TableCell>
-              <TableCell>Service Type</TableCell>
-              <TableCell>Category</TableCell>
+              {/* <TableCell>Service Type</TableCell> */}
+              <TableCell>Hospital</TableCell>
               <TableCell>Cost</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -361,9 +414,9 @@ const handleSubmit = async (event) => {
                 <TableCell>
                   {service?.serviceName} 
                 </TableCell>
-                <TableCell>{service?.serviceDescription}</TableCell>
-                <TableCell>{service?.serviceType}</TableCell>
-                <TableCell>{service?.serviceCategory}</TableCell>
+                <TableCell>{service?.serviceDescription ?? 'N/A'}</TableCell>
+                {/* <TableCell>{service?.serviceType}</TableCell> */}
+                <TableCell>{service?.hospital?.hospitalShortName}</TableCell>
                 <TableCell>₦{service?.serviceCost ? new Intl.NumberFormat().format(service.serviceCost) : "N/A"}</TableCell>
                 
   
@@ -421,16 +474,16 @@ const handleSubmit = async (event) => {
               rows={4}
             />
            
-            <FormControl fullWidth margin="dense">
+            {/* <FormControl fullWidth margin="dense">
               <InputLabel>Type</InputLabel>
               <Select name="serviceType" value={formData.serviceType} onChange={handleInputChange} required>
                 {serviceType.map((type) => (
                   <MenuItem key={type} value={type}>{type}</MenuItem>
                 ))}
               </Select>
-            </FormControl>
+            </FormControl> */}
             
-            {formData.serviceType === 'Medicine' && (
+            {/* {formData.serviceType === 'Medicine' && (
               <FormControl fullWidth margin="dense">
                 <InputLabel>Category</InputLabel>
                 <Select name="serviceCategory" value={formData.serviceCategory} onChange={handleInputChange} required>
@@ -439,7 +492,26 @@ const handleSubmit = async (event) => {
                   ))}
                 </Select>
               </FormControl>
-            )}
+            )} */}
+            <FormControl fullWidth style={{ marginTop: "15px" }}>
+                      <InputLabel>Hospital</InputLabel>
+                      <Select
+                        value={selectedHospital}
+                        // onChange={(e) => setSelectedHospital(e.target.value)}
+                        onChange={handleHospitalChange}
+
+                      >
+                        {hospitals.length > 0 ? (
+                          hospitals.map((hospital) => (
+                            <MenuItem key={hospital.hospitalId} value={hospital.hospitalId}>
+                              {hospital.hospitalName}
+                            </MenuItem>
+                          ))
+                        ) : (
+                          <MenuItem disabled>No hospitals available</MenuItem>
+                        )}
+                      </Select>
+                    </FormControl>
 
            <FormControl fullWidth margin="dense">
             
@@ -601,7 +673,7 @@ const handleSubmit = async (event) => {
             })
           }
         />
-        <TextField
+        {/* <TextField
           fullWidth
           margin="normal"
           label="Service Type"
@@ -612,7 +684,9 @@ const handleSubmit = async (event) => {
               serviceType: e.target.value,
             })
           }
-        />
+        /> */}
+
+        
         <TextField
           fullWidth
           margin="normal"

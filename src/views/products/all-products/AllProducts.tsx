@@ -98,8 +98,8 @@ const router = useRouter();
   const [formData, setFormData] = useState({
     productName: "",
     productDescription: "",
-    productType: "",
-    productCategory: "",
+    // productType: "",
+    // productCategory: "",
     productQuantity: "",
     productCost: "",
     productPrice: "",
@@ -171,8 +171,8 @@ const handleSubmit = async (event) => {
       setFormData({
         productName: "",
         productDescription: "",
-        productType: "",
-        productCategory: "",
+        // productType: "",
+        // productCategory: "",
         productQuantity: "",
         productCost: "",
         productPrice: "",
@@ -348,8 +348,8 @@ const handleSubmit = async (event) => {
             <TableRow>
               <TableCell>Product Name</TableCell>
               <TableCell>Description</TableCell>
-              <TableCell>Product Type</TableCell>
-              <TableCell>Category</TableCell>
+              {/* <TableCell>Product Type</TableCell>
+              <TableCell>Category</TableCell> */}
               <TableCell>Cost</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -362,8 +362,8 @@ const handleSubmit = async (event) => {
                   {product?.productName} 
                 </TableCell>
                 <TableCell>{product?.productDescription}</TableCell>
-                <TableCell>{product?.productType}</TableCell>
-                <TableCell>{product?.productCategory}</TableCell>
+                {/* <TableCell>{product?.productType}</TableCell>
+                <TableCell>{product?.productCategory}</TableCell> */}
                 <TableCell>₦{product?.productCost ? new Intl.NumberFormat().format(product.productCost) : "N/A"}</TableCell>
                 
   
@@ -421,7 +421,7 @@ const handleSubmit = async (event) => {
               rows={4}
             />
            
-            <FormControl fullWidth margin="dense">
+            {/* <FormControl fullWidth margin="dense">
               <InputLabel>Type</InputLabel>
               <Select name="productType" value={formData.productType} onChange={handleInputChange} required>
                 {productType.map((type) => (
@@ -439,7 +439,7 @@ const handleSubmit = async (event) => {
                   ))}
                 </Select>
               </FormControl>
-            )}
+            )} */}
 
            <FormControl fullWidth margin="dense">
             

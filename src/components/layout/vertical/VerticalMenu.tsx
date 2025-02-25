@@ -209,8 +209,7 @@ const App = () => {
     // },
 
 
-// Super Admin
-
+// Super Admin OR NICRAT ICT
 {
   label: "Patients",
   icon: <i className="ri-wheelchair-fill" />,
@@ -232,6 +231,19 @@ const App = () => {
       permission: "manage_hospital_admins",
     },
 
+    {
+      label: "Manage Services",
+      icon: <i className="ri-service-fill" />,
+      href: "/dashboard/services/",
+      permission: "view_all_hospitals",
+    },
+
+    {
+      label: "Manage Products",
+      icon: <i className="ri-box-3-fill" />,
+      href: "/dashboard/products/",
+      permission: "view_all_hospitals",
+    },
 
     {
       label: "Hospital Maps",

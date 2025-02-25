@@ -2,14 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  Tooltip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   CircularProgress, Typography, TextField, IconButton, Dialog, DialogTitle,
   DialogContent, DialogActions, Button, Select, MenuItem, FormControl, InputLabel
 } from '@mui/material';
-import { Edit, Visibility, LocalPharmacy, Delete } from '@mui/icons-material';
+import {Edit, Visibility, LocalPharmacy, Delete, TransferWithinAStation, MedicalServices } from '@mui/icons-material';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import Cookies from 'js-cookie';
+// import Tooltip from '@mui/material';
 
 const DoctorPatientsTable = () => {
   const [patients, setPatients] = useState([]);
@@ -29,7 +30,17 @@ const DoctorPatientsTable = () => {
   const [cart, setCart] = useState([]); // Stores selected products and services
   const [prescribing, setPrescribing] = useState(false);
 
+  const [openTransferModal, setOpenTransferModal] = useState(false);
+  const [openReferralModal, setOpenReferralModal] = useState(false);
+  const [hospitals, setHospitals] = useState([]);
+  const [selectedHospital, setSelectedHospital] = useState("");
+
   const [comments, setComments] = useState('');
+  // const [comments, setComments] = useState('');
+  const [referring, setReferring] = useState(false);
+
+  const [referralCart, setReferralCart] = useState([]); // Stores selected referral services
+
   // Fetch Patients
   useEffect(() => {
     const fetchPatients = async () => {
@@ -49,6 +60,61 @@ const DoctorPatientsTable = () => {
 
     fetchPatients();
   }, []);
+
+
+  useEffect(() => {
+    const fetchHospitals = async () => {
+      try {
+        const token = Cookies.get("authToken");
+        if (!token) {
+          console.warn("No auth token found.");
+          return;
+        }
+  
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/hospitals`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+  
+        if (Array.isArray(response.data)) {
+          setHospitals(response.data);
+        } else {
+          console.warn("Unexpected response format:", response.data);
+          setHospitals([]);
+        }
+      } catch (error) {
+        console.error("Error fetching hospitals:", error);
+      }
+    };
+  
+    if (openTransferModal || openReferralModal) {
+      fetchHospitals();
+    }
+  
+    // Optional cleanup function (not needed in this case, but good practice)
+    return () => {
+      setHospitals([]); // Reset if needed when modals close
+    };
+  }, [openTransferModal, openReferralModal]);
+  
+   // Open modals
+   const handleOpenTransferModal = (patient) => {
+    setSelectedPatient(patient);
+    setOpenTransferModal(true);
+  };
+
+  const handleOpenReferralModal = (patient) => {
+    setSelectedPatient(patient);
+    setOpenReferralModal(true);
+  };
+
+  // Close modals
+  const handleCloseTransferModal = () => {
+    setOpenTransferModal(false);
+  };
+
+  const handleCloseReferralModal = () => {
+    setOpenReferralModal(false);
+  };
 
   // Fetch Products and Services when Modal Opens
   const handleOpenPrescriptionModal = async (patient) => {
@@ -80,6 +146,7 @@ const DoctorPatientsTable = () => {
     setQuantity(1);
   };
 
+  
   // Add Product to Cart
   const handleAddProductToCart = () => {
     if (!selectedProduct || quantity < 1) return;
@@ -96,6 +163,34 @@ const DoctorPatientsTable = () => {
     setCart([...cart, { type: 'service', id: selectedService, name: serviceDetails.serviceName }]);
     setSelectedService('');
   };
+
+  // const handleAddReferralServiceToCart = () => {
+  //   if (!selectedService) return;
+  //   const serviceDetails = services.find(s => s.serviceId === selectedService);
+  //   setReferralCart([...referralCart, { id: selectedService, name: serviceDetails.serviceName }]);
+  //   setSelectedService('');
+  // };
+  
+
+  const handleAddReferralServiceToCart = () => {
+    if (!selectedService) {
+      alert("Please select a service first!");
+      return;
+    }
+  
+    // Find the selected service object
+    const service = services.find(s => s.serviceId === selectedService);
+    if (!service) {
+      alert("Invalid service selected!");
+      return;
+    }
+  
+    // Add to cart with both serviceId and serviceName
+    setCart(prevCart => [...prevCart, { serviceId: service.serviceId, serviceName: service.serviceName, cost: service.serviceCost }]);
+  };
+  
+  
+  
 
   // Remove Item from Cart
   const handleRemoveFromCart = (index) => {
@@ -133,6 +228,53 @@ const DoctorPatientsTable = () => {
     }
     setPrescribing(false);
   };
+
+
+  // Fetch Services When Hospital is Selected
+  const handleHospitalChange = async (hospitalId) => {
+    setSelectedHospital(hospitalId);
+    setSelectedService('');
+    setReferralCart([]);
+
+    try {
+      const token = Cookies.get('authToken');
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/hospital/${hospitalId}/services`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setServices(response.data);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    }
+  };
+
+  // Submit Referral
+  const handleSubmitReferral = async () => {
+    if (!selectedPatient || !selectedHospital || referralCart.length === 0) {
+      Swal.fire('Error!', 'Please select a hospital and at least one service.', 'error');
+      return;
+    }
+    setReferring(true);
+
+    try {
+      const token = Cookies.get('authToken');
+      const payload = {
+        patientId: selectedPatient.patientId,
+        hospitalId: selectedHospital,
+        services: referralCart.map(service => service.id),
+      };
+
+      await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/referrals`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      Swal.fire('Success!', 'Referral submitted successfully.', 'success');
+      setOpenReferralModal(false);
+    } catch (error) {
+      Swal.fire('Error!', 'Failed to submit referral.', 'error');
+    }
+    setReferring(false);
+  };
+
   
   return (
     <div>
@@ -159,6 +301,7 @@ const DoctorPatientsTable = () => {
                 <TableCell>CHF ID</TableCell>
                 <TableCell>Patient Name</TableCell>
                 <TableCell>Diagnosis</TableCell>
+                <TableCell>Phone Number</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -168,10 +311,31 @@ const DoctorPatientsTable = () => {
                   <TableCell>{patient.chfId}</TableCell>
                   <TableCell>{patient.user.firstName} {patient.user.lastName}</TableCell>
                   <TableCell>{patient.cancer?.cancerName || 'N/A'}</TableCell>
+                  <TableCell>{patient.user?.phoneNumber || 'N/A'}</TableCell>
                   <TableCell>
-                    <IconButton color="secondary" onClick={() => handleOpenPrescriptionModal(patient)}>
-                      <LocalPharmacy />
-                    </IconButton>
+                  
+
+<Tooltip title="Prescribe Medication">
+  <IconButton color="primary" onClick={() => handleOpenPrescriptionModal(patient)}>
+    <LocalPharmacy />
+  </IconButton>
+</Tooltip>
+
+<Tooltip title="Refer Patient">
+  <IconButton color="info" onClick={() => handleOpenReferralModal(patient)}>
+    <MedicalServices />
+  </IconButton>
+</Tooltip>
+
+<Tooltip title="Transfer Patient">
+  <IconButton color="error" onClick={() => handleOpenTransferModal(patient)}>
+    <TransferWithinAStation />
+  </IconButton>
+</Tooltip>
+
+
+                    
+
                   </TableCell>
                 </TableRow>
               ))}
@@ -263,6 +427,173 @@ const DoctorPatientsTable = () => {
                     </Button>
         </DialogActions>
       </Dialog>
+
+
+
+
+      {/* Transfer Modal */}
+      {/* <Dialog open={openTransferModal} onClose={handleCloseTransferModal} maxWidth="sm" fullWidth>
+        <DialogTitle>Transfer Patient</DialogTitle>
+        <DialogContent>
+          <Typography>Transfer {selectedPatient?.user.firstName} {selectedPatient?.user.lastName} to another hospital.</Typography>
+          <FormControl fullWidth style={{ marginTop: '15px' }}>
+            <InputLabel>Hospital</InputLabel>
+            <Select>
+              <MenuItem value="Oncology">Oncology</MenuItem>
+              <MenuItem value="Cardiology">Cardiology</MenuItem>
+              <MenuItem value="Neurology">Neurology</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseTransferModal}>Cancel</Button>
+          <Button variant="contained" color="primary">Transfer</Button>
+        </DialogActions>
+      </Dialog> */}
+      <Dialog open={openTransferModal} onClose={handleCloseTransferModal} maxWidth="sm" fullWidth>
+      <DialogTitle>Recommend Patient for Transfer</DialogTitle>
+      <DialogContent>
+        <Typography>
+          Recommend {selectedPatient?.user.firstName}{" "}
+          {selectedPatient?.user.lastName} for transfer to another hospital.
+        </Typography>
+
+        <FormControl fullWidth style={{ marginTop: "15px" }}>
+          <InputLabel>Hospital</InputLabel>
+          <Select
+            value={selectedHospital}
+            onChange={(e) => setSelectedHospital(e.target.value)}
+          >
+            {hospitals.length > 0 ? (
+              hospitals.map((hospital) => (
+                <MenuItem key={hospital.hospitalId} value={hospital.hospitalId}>
+                  {hospital.hospitalName}
+                </MenuItem>
+              ))
+            ) : (
+              <MenuItem disabled>No hospitals available</MenuItem>
+            )}
+          </Select>
+        </FormControl>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCloseTransferModal}>Cancel</Button>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={!selectedHospital}
+        >
+          Recommend Transfer
+        </Button>
+      </DialogActions>
+    </Dialog>
+
+      {/* Referral Modal */}
+      {/* <Dialog open={openReferralModal} onClose={handleCloseReferralModal} maxWidth="sm" fullWidth>
+        <DialogTitle>Refer Patient</DialogTitle>
+        <DialogContent>
+          <Typography>Refer {selectedPatient?.user.firstName} {selectedPatient?.user.lastName} to a specialist.</Typography>
+          <FormControl fullWidth style={{ marginTop: '15px' }}>
+            <InputLabel>Specialist</InputLabel>
+            <Select>
+              <MenuItem value="Dermatologist">Dermatologist</MenuItem>
+              <MenuItem value="Endocrinologist">Endocrinologist</MenuItem>
+              <MenuItem value="Orthopedic">Orthopedic</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseReferralModal}>Cancel</Button>
+          <Button variant="contained" color="secondary">Refer</Button>
+        </DialogActions>
+      </Dialog> */}
+ 
+ {/* Referral Modal */}
+ <Dialog open={openReferralModal} onClose={() => setOpenReferralModal(false)} maxWidth="sm" fullWidth>
+  <DialogTitle>Refer Patient</DialogTitle>
+  <DialogContent>
+    {/* Select Hospital */}
+    <FormControl fullWidth>
+      <InputLabel>Select Hospital</InputLabel>
+      <Select value={selectedHospital} onChange={(e) => handleHospitalChange(e.target.value)}>
+        {hospitals.length > 0 ? (
+          hospitals.map((hospital) => (
+            <MenuItem key={hospital.hospitalId} value={hospital.hospitalId}>
+              {hospital.hospitalName}
+            </MenuItem>
+          ))
+        ) : (
+          <MenuItem disabled>No hospitals available</MenuItem>
+        )}
+      </Select>
+    </FormControl>
+
+    {/* Select Service */}
+    <FormControl fullWidth style={{ marginTop: 15 }}>
+      <InputLabel>Select Service</InputLabel>
+      <Select value={selectedService} onChange={(e) => setSelectedService(e.target.value)}>
+        {services.map((service) => (
+          <MenuItem key={service.serviceId} value={service.serviceId}>
+            {service.serviceName}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
+    {/* Add Service to Cart Button */}
+    <Button variant="contained" color="primary" onClick={handleAddReferralServiceToCart} style={{ marginTop: 15 }}>
+      Add Referral Service
+    </Button>
+
+    {/* 🛒 Cart Table: Shows Added Services */}
+    {cart.length > 0 ? (
+      <TableContainer component={Paper} style={{ marginTop: 20 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell><b>Service</b></TableCell>
+              <TableCell><b>Cost</b></TableCell>
+              <TableCell align="right"><b>Action</b></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+  {cart.map((item, index) => (
+    <TableRow key={index}>
+      <TableCell>{item.serviceName ? item.serviceName : "Unknown Service"}</TableCell>
+      <TableCell>₦{Number(item.cost || 0).toLocaleString('en-NG')}</TableCell>
+
+      <TableCell align="right">
+        <Button color="secondary" onClick={() => handleRemoveFromCart(index)}>
+          Remove
+        </Button>
+      </TableCell>
+    </TableRow>
+    
+  ))}
+</TableBody>
+<Typography variant="h6" style={{ marginTop: 15, textAlign: "right" }}>
+  Total: ₦{cart.reduce((total, item) => total + Number(item.cost || 0), 0).toLocaleString('en-NG')}
+</Typography>
+
+
+
+
+
+        </Table>
+      </TableContainer>
+    ) : (
+      <p style={{ textAlign: "center", marginTop: 15, fontStyle: "italic" }}>No services added.</p>
+    )}
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setOpenReferralModal(false)}>Cancel</Button>
+    <Button variant="contained" color="primary" onClick={handleSubmitReferral} disabled={referring}>
+      {referring ? <CircularProgress size={24} /> : "Refer"}
+    </Button>
+  </DialogActions>
+</Dialog>
+
     </div>
   );
 };
