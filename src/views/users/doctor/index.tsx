@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid'
 // Component Imports
 
 
-import HospitalAdmin from './HospitalAdmin'
+import HospitalAdmin from './HospitalAdmin2'
 
 const Account = () => {
   return (

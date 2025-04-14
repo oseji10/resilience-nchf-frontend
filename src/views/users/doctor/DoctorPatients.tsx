@@ -28,6 +28,7 @@ const DoctorPatientsTable = () => {
   const [selectedService, setSelectedService] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [cart, setCart] = useState([]); // Stores selected products and services
+  
   const [prescribing, setPrescribing] = useState(false);
 
   const [openTransferModal, setOpenTransferModal] = useState(false);
@@ -186,7 +187,7 @@ const DoctorPatientsTable = () => {
     }
   
     // Add to cart with both serviceId and serviceName
-    setCart(prevCart => [...prevCart, { serviceId: service.serviceId, serviceName: service.serviceName, cost: service.serviceCost }]);
+    setReferralCart(prevCart => [...prevCart, { serviceId: service.serviceId, serviceName: service.serviceName, cost: service.serviceCost }]);
   };
   
   
@@ -251,6 +252,7 @@ const DoctorPatientsTable = () => {
   const handleSubmitReferral = async () => {
     if (!selectedPatient || !selectedHospital || referralCart.length === 0) {
       Swal.fire('Error!', 'Please select a hospital and at least one service.', 'error');
+      setOpenReferralModal(false);
       return;
     }
     setReferring(true);
@@ -258,16 +260,24 @@ const DoctorPatientsTable = () => {
     try {
       const token = Cookies.get('authToken');
       const payload = {
-        patientId: selectedPatient.patientId,
+        patientId: selectedPatient.userId,
         hospitalId: selectedHospital,
-        services: referralCart.map(service => service.id),
+        services: referralCart.map(service => service.serviceId),
+        comment: comments,
       };
 
-      await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/referrals`, payload, {
+      await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/referral`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       Swal.fire('Success!', 'Referral submitted successfully.', 'success');
+       // Clear form fields after submission
+    setSelectedPatient(null);
+    setSelectedHospital('');
+    setSelectedService('');
+    setReferralCart([]);
+    setComments('');
+
       setOpenReferralModal(false);
     } catch (error) {
       Swal.fire('Error!', 'Failed to submit referral.', 'error');
@@ -299,6 +309,7 @@ const DoctorPatientsTable = () => {
             <TableHead>
               <TableRow>
                 <TableCell>CHF ID</TableCell>
+                <TableCell>Hospital File Number</TableCell>
                 <TableCell>Patient Name</TableCell>
                 <TableCell>Diagnosis</TableCell>
                 <TableCell>Phone Number</TableCell>
@@ -309,6 +320,7 @@ const DoctorPatientsTable = () => {
               {filteredPatients.map((patient) => (
                 <TableRow key={patient.patientId}>
                   <TableCell>{patient.chfId}</TableCell>
+                  <TableCell>{patient.hospitalFileNumber}</TableCell>
                   <TableCell>{patient.user.firstName} {patient.user.lastName}</TableCell>
                   <TableCell>{patient.cancer?.cancerName || 'N/A'}</TableCell>
                   <TableCell>{patient.user?.phoneNumber || 'N/A'}</TableCell>
@@ -528,6 +540,17 @@ const DoctorPatientsTable = () => {
       </Select>
     </FormControl>
 
+    <TextField
+    label="Doctor's Comments"
+    multiline
+    rows={2}
+    variant="outlined"
+    fullWidth
+    value={comments}
+    onChange={(e) => setComments(e.target.value)}
+    style={{ marginTop: '15px' }}
+  />
+
     {/* Select Service */}
     <FormControl fullWidth style={{ marginTop: 15 }}>
       <InputLabel>Select Service</InputLabel>
@@ -546,7 +569,7 @@ const DoctorPatientsTable = () => {
     </Button>
 
     {/* 🛒 Cart Table: Shows Added Services */}
-    {cart.length > 0 ? (
+    {referralCart.length > 0 ? (
       <TableContainer component={Paper} style={{ marginTop: 20 }}>
         <Table>
           <TableHead>
@@ -557,7 +580,7 @@ const DoctorPatientsTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-  {cart.map((item, index) => (
+  {referralCart.map((item, index) => (
     <TableRow key={index}>
       <TableCell>{item.serviceName ? item.serviceName : "Unknown Service"}</TableCell>
       <TableCell>₦{Number(item.cost || 0).toLocaleString('en-NG')}</TableCell>
@@ -572,7 +595,7 @@ const DoctorPatientsTable = () => {
   ))}
 </TableBody>
 <Typography variant="h6" style={{ marginTop: 15, textAlign: "right" }}>
-  Total: ₦{cart.reduce((total, item) => total + Number(item.cost || 0), 0).toLocaleString('en-NG')}
+  Total: ₦{referralCart.reduce((total, item) => total + Number(item.cost || 0), 0).toLocaleString('en-NG')}
 </Typography>
 
 

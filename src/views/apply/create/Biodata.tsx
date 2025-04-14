@@ -1,7 +1,9 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+
 import { useRouter } from 'next/navigation'
+
 import axios from 'axios'
 
 // MUI Imports
@@ -18,7 +20,9 @@ import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
 import { Box } from '@mui/material'
 import Swal from 'sweetalert2'
+
 import Cookies from 'js-cookie'
+
 const Biodata = () => {
 
   const router = useRouter()
@@ -81,6 +85,7 @@ const Biodata = () => {
     mobilePhone: "",
     howPhoneIsRecharged: "",
   })
+
   const [loading, setLoading] = useState(false)
 
   const [hospitals, setHospitals] = useState([])
@@ -102,6 +107,7 @@ const Biodata = () => {
       try {
         const token = Cookies.get("authToken");
         const config = { headers: { Authorization: `Bearer ${token}` } };
+
         const responses = await Promise.allSettled([
           axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/hospitals`, config),
           axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/cancers`, config),
@@ -132,6 +138,7 @@ const Biodata = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     if (step === 5) {
       handleNextStep();
     } else {
@@ -189,6 +196,7 @@ const Biodata = () => {
   ];
 
   const nextStep = () => setStep(step + 1)
+
   // const prevStep = () => setStep(step - 1)
   const prevStep = () => {
     if (step > 1) {
@@ -204,6 +212,7 @@ const Biodata = () => {
         title: 'Validation Error',
         text: 'NIN is required before proceeding.',
       });
+      
       return;
     }
 
@@ -273,7 +282,7 @@ const Biodata = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        if (response.data > 2 && response.data < 7) {
+        if (response.data >= 2 && response.data < 7) {
           router.replace(`/dashboard/apply/application-completed`);
         } else if (response.data === 7) {
           router.replace(`/dashboard/apply/start-care`);

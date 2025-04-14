@@ -339,7 +339,7 @@ const HospitalAdmin = () => {
             <option value="/dashboard/users/cmds">CMDs</option>
             <option value="/dashboard/users/other-staff">Other Staff</option>
           </select>
-          <Button onClick={handleNavigate}>Go</Button>
+          <Button variant='contained' color='primary' onClick={handleNavigate}>Go</Button>
         </div>
       <Button variant="contained" color="primary" onClick={handleOpenModal}>
         Create New Admin

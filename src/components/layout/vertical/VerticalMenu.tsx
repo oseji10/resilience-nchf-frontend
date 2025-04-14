@@ -193,7 +193,7 @@ const App = () => {
     {
       label: "Transfer/Referral",
       icon: <i className="ri-arrow-left-right-fill" />,
-      href: "/dashboard/patient-billing-history",
+      href: "/dashboard/users/doctor/referrals",
       permission: "doctor_manage_transfers",
     },
 
@@ -308,7 +308,7 @@ const App = () => {
 
 // MDT Roles
 {
-  label: "My Patients",
+  label: "All Patients",
   icon: <i className="ri-group-fill" />,
   href: "/dashboard/users/mdt/patients",
   permission: "mdt_manage_patients",
@@ -324,6 +324,13 @@ const App = () => {
   icon: <i className="ri-hourglass-fill" />,
   href: "/dashboard/users/mdt/pending",
   permission: "mdt_manage_patients",
+},
+
+{
+  label: "Transfer/Referral",
+  icon: <i className="ri-arrow-left-right-fill" />,
+  href: "/dashboard/users/mdt/referrals",
+  permission: "mdt_manage_transfers",
 },
 
 

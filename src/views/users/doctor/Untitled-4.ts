@@ -1,0 +1,8 @@
+familySetupSize: '',
+birthOrder: '',
+fathersEducationalLevel: '',
+mothersEducationalLevel: '',
+fathersOccupation: '',
+mothersOccupation: '',
+levelOfFamilyCare: '',
+familyMonthlyIncome: '',
