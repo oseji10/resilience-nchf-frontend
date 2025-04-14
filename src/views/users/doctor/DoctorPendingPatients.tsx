@@ -49,6 +49,7 @@ const DoctorPendingPatientsTable = () => {
   const [amountRecommended, setAmountRecommended] = useState('');
   const [approved, setApproved] = useState(false);
   const [patientHistory, setPatientHistory] = useState('');
+  const [isHistoryEdit, setIsHistoryEdit] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -60,22 +61,23 @@ const DoctorPendingPatientsTable = () => {
     'Stage 4 - Metastatic',
   ];
 
-  useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const token = Cookies.get('authToken');
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/pending`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setPatients(response.data);
-        setFilteredPatients(response.data);
-      } catch (err) {
-        setError('Failed to load patients data.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchPatients = async () => {
+    try {
+      setLoading(true);
+      const token = Cookies.get('authToken');
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/pending`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPatients(response.data);
+      setFilteredPatients(response.data);
+    } catch (err) {
+      setError('Failed to load patients data.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchPatients();
   }, []);
 
@@ -93,8 +95,24 @@ const DoctorPendingPatientsTable = () => {
     setOpenAssignDoctorModal(true);
   };
 
-  const handleOpenHistoryModal = (patient) => {
+  const handleOpenHistoryModal = async (patient) => {
     setSelectedPatient(patient);
+    setPatientHistory('');
+    setIsHistoryEdit(false);
+    try {
+      const token = Cookies.get('authToken');
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_APP_URL}/patient-medical-history/${patient.userId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.data && response.data.history) {
+        setPatientHistory(response.data.history);
+        setIsHistoryEdit(true);
+      }
+    } catch (error) {
+      setPatientHistory('');
+      setIsHistoryEdit(false);
+    }
     setOpenHistoryModal(true);
   };
 
@@ -109,12 +127,18 @@ const DoctorPendingPatientsTable = () => {
   const handleCloseHistoryModal = () => {
     setOpenHistoryModal(false);
     setPatientHistory('');
+    setIsHistoryEdit(false);
   };
 
   const handleAssignCarePlan = async () => {
     if (!approved) {
       setOpenAssignDoctorModal(false);
-      Swal.fire('Warning', 'You must approve the care plan by ticking the checkbox before submitting.', 'warning');
+      Swal.fire({
+        title: 'Warning',
+        text: 'You must approve the care plan by ticking the checkbox before submitting.',
+        icon: 'warning',
+        zIndex: 9999,
+      });
       return;
     }
 
@@ -132,45 +156,87 @@ const DoctorPendingPatientsTable = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       if (response.status === 200 || response.status === 201) {
-        Swal.fire('Success!', 'Care plan assigned successfully!', 'success');
+        Swal.fire({
+          title: 'Success!',
+          text: 'Care plan assigned successfully!',
+          icon: 'success',
+          zIndex: 9999,
+        });
         handleCloseAssignDoctorModal();
       } else {
-        Swal.fire('Error!', `Unexpected response: ${response.status}`, 'error');
+        Swal.fire({
+          title: 'Error!',
+          text: `Unexpected response: ${response.status}`,
+          icon: 'error',
+          zIndex: 9999,
+        });
       }
     } catch (error) {
-      Swal.fire('Oops!', 'An error occurred.', 'error');
+      Swal.fire({
+        title: 'Oops!',
+        text: 'An error occurred.',
+        icon: 'error',
+        zIndex: 9999,
+      });
     } finally {
       setAssigning(false);
     }
   };
 
-  const handleDisapproveCarePlan = async (patientId) => {
+  const handleDisapproveCarePlan = async (patient) => {
     Swal.fire({
       title: 'Are you sure?',
-      text: 'You are about to disapprove this care plan. This action cannot be undone.',
+      text: 'You are about to disapprove this patient. This action cannot be undone.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, disapprove it!',
+      confirmButtonText: 'Yes, disapprove them!',
+      zIndex: 9999,
+      input: 'textarea',
+      inputLabel: 'Reason for Disapproval',
+      inputPlaceholder: 'Please provide the reason for disapproving this patient...',
+      inputAttributes: {
+        'aria-label': 'Reason for disapproval',
+        style: 'resize: vertical; min-height: 100px;',
+      },
+      preConfirm: (reason) => {
+        if (!reason) {
+          Swal.showValidationMessage('Reason for disapproval is required');
+          return false;
+        }
+        return reason;
+      },
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           const token = Cookies.get('authToken');
           await axios.post(
-            `${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/careplan`,
+            `${process.env.NEXT_PUBLIC_APP_URL}/patient/rejected`,
             {
-              patientId,
+              patientUserId: patient.userId,
+              hospitalId: patient.hospital,
               status: 'disapproved',
+              reason: result.value,
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );
-
-          Swal.fire('Success!', 'Care plan disapproved.', 'success');
+          Swal.fire({
+            title: 'Success!',
+            text: 'Patient disapproved.',
+            icon: 'success',
+            zIndex: 9999,
+          });
+          // Reload the table by refetching patients
+          await fetchPatients();
         } catch (error) {
-          Swal.fire('Oops!', 'An error occurred.', 'error');
+          Swal.fire({
+            title: 'Oops!',
+            text: 'An error occurred.',
+            icon: 'error',
+            zIndex: 9999,
+          });
         }
       }
     });
@@ -180,15 +246,28 @@ const DoctorPendingPatientsTable = () => {
     try {
       const token = Cookies.get('authToken');
       await axios.post(
-        `${process.env.NEXT_PUBLIC_APP_URL}/patient-history`,
-        { patientId: selectedPatient.patientId, history: patientHistory },
+        `${process.env.NEXT_PUBLIC_APP_URL}/patient-medical-history`,
+        {
+          patientUserId: selectedPatient.userId,
+          hospitalId: selectedPatient.hospital,
+          history: patientHistory,
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      Swal.fire('Success!', 'Patient history updated successfully!', 'success');
+      Swal.fire({
+        title: 'Success!',
+        text: 'Patient history updated successfully!',
+        icon: 'success',
+        zIndex: 9999,
+      });
       handleCloseHistoryModal();
     } catch (error) {
-      Swal.fire('Oops!', 'An error occurred while saving history.', 'error');
+      Swal.fire({
+        title: 'Oops!',
+        text: 'An error occurred while saving history.',
+        icon: 'error',
+        zIndex: 9999,
+      });
     }
   };
 
@@ -231,7 +310,7 @@ const DoctorPendingPatientsTable = () => {
                   <TableCell>
                     <IconButton onClick={() => handleOpenHistoryModal(patient)} color="info"><History /></IconButton>
                     <IconButton onClick={() => handleOpenAssignDoctorModal(patient)} color="primary"><Edit /></IconButton>
-                    <IconButton onClick={() => handleDisapproveCarePlan(patient.patientId)} color="error"><Cancel /></IconButton>
+                    <IconButton onClick={() => handleDisapproveCarePlan(patient)} color="error"><Cancel /></IconButton>
                   </TableCell>
                 </TableRow>
               ))}
@@ -243,40 +322,59 @@ const DoctorPendingPatientsTable = () => {
       <Dialog fullWidth maxWidth="md" open={openHistoryModal} onClose={handleCloseHistoryModal}>
         <DialogTitle>Patient History</DialogTitle>
         <DialogContent>
-        <FormControl fullWidth>
-          <TextField multiline rows={4}  value={patientHistory} onChange={(e) => setPatientHistory(e.target.value)} />
-        </FormControl>
+          <FormControl fullWidth>
+            <TextField
+              multiline
+              rows={4}
+              value={patientHistory}
+              onChange={(e) => setPatientHistory(e.target.value)}
+            />
+          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseHistoryModal}>Cancel</Button>
-          <Button onClick={handleSubmitHistory} variant="contained" color="primary">Save</Button>
+          <Button onClick={handleSubmitHistory} variant="contained" color="primary">
+            {isHistoryEdit ? 'Modify' : 'Save'}
+          </Button>
         </DialogActions>
       </Dialog>
 
-   
-      {/* Assign Care Plan Modal */}
-          
-          <Dialog fullWidth maxWidth="md" open={openAssignDoctorModal} onClose={handleCloseAssignDoctorModal}>
-        <DialogTitle>Desing A Care Plan</DialogTitle>
+      <Dialog fullWidth maxWidth="md" open={openAssignDoctorModal} onClose={handleCloseAssignDoctorModal}>
+        <DialogTitle>Design A Care Plan</DialogTitle>
         <DialogContent>
-          <TextField label="Care Plan" fullWidth multiline rows={4} value={carePlan} onChange={(e) => setCarePlan(e.target.value)} sx={{ mt: 2 }}/>
-          <TextField label="Amount Recommended" fullWidth type="number" value={amountRecommended} onChange={(e) => setAmountRecommended(e.target.value)} sx={{ mt: 2 }}/>
+          <TextField
+            label="Care Plan"
+            fullWidth
+            multiline
+            rows={4}
+            value={carePlan}
+            onChange={(e) => setCarePlan(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+          <TextField
+            label="Amount Recommended"
+            fullWidth
+            type="number"
+            value={amountRecommended}
+            onChange={(e) => setAmountRecommended(e.target.value)}
+            sx={{ mt: 2 }}
+          />
           <Grid item xs={12} mt={4}>
-          <FormControl fullWidth>
-            <InputLabel>Stages of Cancer</InputLabel>
-            <Select value={cancerStage} onChange={(e) => setCancerStage(e.target.value)} >
-            
-            <MenuItem value="Stage 0">Stage 0 - Carcinoma in Situ</MenuItem>
-              <MenuItem value="Stage 1">Stage 1 - Early Stage</MenuItem>
-              <MenuItem value="Stage 2">Stage 2 - Localized</MenuItem>
-              <MenuItem value="Stage 3">Stage 3 - Regional Spread</MenuItem>
-              <MenuItem value="Stage 4">Stage 4 - Metastatic</MenuItem>
-            </Select>
-          </FormControl>
+            <FormControl fullWidth>
+              <InputLabel>Stages of Cancer</InputLabel>
+              <Select value={cancerStage} onChange={(e) => setCancerStage(e.target.value)}>
+                <MenuItem value="Stage 0">Stage 0 - Carcinoma in Situ</MenuItem>
+                <MenuItem value="Stage 1">Stage 1 - Early Stage</MenuItem>
+                <MenuItem value="Stage 2">Stage 2 - Localized</MenuItem>
+                <MenuItem value="Stage 3">Stage 3 - Regional Spread</MenuItem>
+                <MenuItem value="Stage 4">Stage 4 - Metastatic</MenuItem>
+              </Select>
+            </FormControl>
           </Grid>
-
-<FormControlLabel control={<Checkbox checked={approved} onChange={(e) => setApproved(e.target.checked)} />} label="By clicking on this checkbox I affirm the authenticity of the information provided." />
-          
+          <FormControlLabel
+            control={<Checkbox checked={approved} onChange={(e) => setApproved(e.target.checked)} />}
+            label="By clicking on this checkbox I affirm the authenticity of the information provided."
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseAssignDoctorModal}>Cancel</Button>
