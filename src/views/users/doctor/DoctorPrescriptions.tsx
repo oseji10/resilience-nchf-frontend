@@ -118,7 +118,7 @@ const DoctorPrescriptionsTable = () => {
   return (
     <div>
       <Typography variant="h6" gutterBottom>
-        My Patients
+        Prescriptions
       </Typography>
       <TextField
         label="Search Patients"

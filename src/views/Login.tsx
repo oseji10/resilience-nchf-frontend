@@ -73,7 +73,9 @@ const Login = () => {
       username: formData.username,
       password: formData.password,
     };
+    
     await initializeCsrf();
+   
     try {
       // Use axios for the POST request
       const response = await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/login`, payload);
@@ -110,8 +112,8 @@ const Login = () => {
         <CardContent className='p-6 sm:!p-12'>
           <Link href='/' className='flex justify-center items-center '>
             <Logo />
-          </Link>
-          <div className='flex flex-col gap-5'>
+          </Link><br/>
+          <div className='flex flex-col gap-3'>
             <div>
               {/* <Typography variant='h6'>{`This is the National Cancer Health Fund Portal!👋🏻`}</Typography> */}
               <Typography className='mbs-1' align='center'>Please sign-in to your account with your email or phone number and password</Typography>
@@ -125,6 +127,7 @@ const Login = () => {
     severity="success" 
     icon={<CheckCircleIcon fontSize="inherit" />} 
     className="mb-3 animate-fade-in"
+    
     // sx={{ backgroundColor: "primary.main", color: "white" }} 
   >
     {successMessage}

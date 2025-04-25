@@ -6,11 +6,14 @@ import dynamic from 'next/dynamic'
 
 // Component Imports
 import SocialWelfarePendingPatientsTable from '@/views/users/social-welfare/SocialWelfarePendingPatients'
+import SESCalculator from '@/views/users/social-welfare/SESCalculator'
+
 
 
 
 const PatientsPage = () => {
-  return <SocialWelfarePendingPatientsTable />
+  return <SESCalculator />
+  // <SocialWelfarePendingPatientsTable />
 }
 
 export default PatientsPage

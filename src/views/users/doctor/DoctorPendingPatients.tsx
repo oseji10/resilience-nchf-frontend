@@ -143,8 +143,10 @@ const DoctorPendingPatientsTable = () => {
     }
 
     setAssigning(true);
+    
     try {
       const token = Cookies.get('authToken');
+      
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_APP_URL}/patient/doctor/careplan`,
         {
@@ -156,6 +158,7 @@ const DoctorPendingPatientsTable = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      
       if (response.status === 200 || response.status === 201) {
         Swal.fire({
           title: 'Success!',
@@ -164,6 +167,7 @@ const DoctorPendingPatientsTable = () => {
           zIndex: 9999,
         });
         handleCloseAssignDoctorModal();
+        await fetchPatients(); // Reload the table
       } else {
         Swal.fire({
           title: 'Error!',
@@ -187,23 +191,23 @@ const DoctorPendingPatientsTable = () => {
   const handleDisapproveCarePlan = async (patient) => {
     Swal.fire({
       title: 'Are you sure?',
-      text: 'You are about to disapprove this patient. This action cannot be undone.',
+      text: 'You are about to remove this patient. This action cannot be undone.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, disapprove them!',
+      confirmButtonText: 'Yes, remove them!',
       zIndex: 9999,
       input: 'textarea',
-      inputLabel: 'Reason for Disapproval',
-      inputPlaceholder: 'Please provide the reason for disapproving this patient...',
+      inputLabel: 'Reason for Removal',
+      inputPlaceholder: 'Please provide the reason for removing this patient...',
       inputAttributes: {
         'aria-label': 'Reason for disapproval',
         style: 'resize: vertical; min-height: 100px;',
       },
       preConfirm: (reason) => {
         if (!reason) {
-          Swal.showValidationMessage('Reason for disapproval is required');
+          Swal.showValidationMessage('Reason for removing is required');
           return false;
         }
         return reason;
@@ -212,6 +216,7 @@ const DoctorPendingPatientsTable = () => {
       if (result.isConfirmed) {
         try {
           const token = Cookies.get('authToken');
+          
           await axios.post(
             `${process.env.NEXT_PUBLIC_APP_URL}/patient/rejected`,
             {
@@ -228,7 +233,6 @@ const DoctorPendingPatientsTable = () => {
             icon: 'success',
             zIndex: 9999,
           });
-          // Reload the table by refetching patients
           await fetchPatients();
         } catch (error) {
           Swal.fire({
@@ -245,6 +249,7 @@ const DoctorPendingPatientsTable = () => {
   const handleSubmitHistory = async () => {
     try {
       const token = Cookies.get('authToken');
+      
       await axios.post(
         `${process.env.NEXT_PUBLIC_APP_URL}/patient-medical-history`,
         {

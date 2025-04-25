@@ -13,10 +13,6 @@ import {
   Typography,
   TextField,
   IconButton,
-  Modal,
-  Box,
-  Button,
-  TablePagination,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -25,6 +21,9 @@ import {
   FormControl,
   InputLabel,
   Select,
+  Button,
+  TablePagination,
+  Box,
 } from '@mui/material';
 import { Edit, Visibility } from '@mui/icons-material';
 import axios from 'axios';
@@ -41,14 +40,12 @@ const HospitalPatientsTable = () => {
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  // const [assigning, setAssigning] = useState(false);
   const [assigning, setAssigning] = useState<{ [key: string]: boolean }>({});
-
   const [error, setError] = useState<string | null>(null);
   const [openAssignDoctorModal, setOpenAssignDoctorModal] = useState(false);
-  const [doctors, setDoctors] = useState([]); // Store doctors
+  const [doctors, setDoctors] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState<string | null>(null);
-  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -72,20 +69,24 @@ const HospitalPatientsTable = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = patients.filter((patient) =>
-      `${patient.user.firstName} ${patient.user.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const filtered = patients.filter((patient: any) =>
+      `${patient.user.firstName} ${patient.user.lastName}`
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
       patient.chfId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (patient.cancer?.cancerName?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-      (patient.doctor ? `${patient.doctor.firstName} ${patient.doctor.lastName}`.toLowerCase() : '').includes(searchQuery.toLowerCase())
+      (patient.doctor
+        ? `${patient.doctor.firstName} ${patient.doctor.lastName}`.toLowerCase()
+        : ''
+      ).includes(searchQuery.toLowerCase())
     );
     setFilteredPatients(filtered);
   }, [searchQuery, patients]);
 
-  const handleOpenAssignDoctorModal = async (patient) => {
+  const handleOpenAssignDoctorModal = async (patient: any) => {
     setSelectedPatient(patient);
     setOpenAssignDoctorModal(true);
     setLoading(true);
-    // setAssigning(true);
 
     try {
       const token = Cookies.get('authToken');
@@ -97,34 +98,29 @@ const HospitalPatientsTable = () => {
       Swal.fire('Error', 'Failed to load doctors.', 'error');
     } finally {
       setLoading(false);
-      // setAssigning(false);
     }
   };
 
   const handleCloseAssignDoctorModal = () => {
     setOpenAssignDoctorModal(false);
     setSelectedDoctor(null);
+    setSelectedPatient(null);
   };
-
-  // const [assigning, setAssigning] = useState<{ [key: string]: boolean }>({});
 
   const handleDoctorAssign = async () => {
     if (!selectedDoctor) {
       Swal.fire('Error!', 'Please select a doctor.', 'error');
       return;
     }
-  
-    // Ensure selectedPatient is valid before proceeding
+
     if (!selectedPatient || !selectedPatient.patientId) {
       Swal.fire('Error!', 'No patient selected.', 'error');
       return;
     }
-  
+
     const patientId = selectedPatient.patientId;
-  
-    // Set assigning state only for the selected patient
     setAssigning((prev) => ({ ...prev, [patientId]: true }));
-  
+
     try {
       const token = Cookies.get('authToken');
       const response = await axios.post(
@@ -132,23 +128,32 @@ const HospitalPatientsTable = () => {
         { patientId, doctorId: selectedDoctor },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-  
+
       if (response.status === 200 || response.status === 201) {
+        // Find the selected doctor from the doctors array
+        const assignedDoctor = doctors.find((doctor: any) => doctor.id === selectedDoctor);
+
+        // Update the patients state with the new doctor
+        setPatients((prevPatients: any) =>
+          prevPatients.map((patient: any) =>
+            patient.patientId === patientId
+              ? { ...patient, doctor: assignedDoctor || null }
+              : patient
+          )
+        );
+
         Swal.fire('Success!', 'Doctor assigned successfully!', 'success');
       } else {
         Swal.fire('Error!', `Unexpected response: ${response.status}`, 'error');
       }
     } catch (error) {
-      Swal.fire('Oops!', 'An error occurred.', 'error');
+      Swal.fire('Oops!', 'An error occurred while assigning the doctor.', 'error');
     } finally {
-      // Reset assigning state for the specific patient
       setAssigning((prev) => ({ ...prev, [patientId]: false }));
       handleCloseAssignDoctorModal();
     }
   };
-  
-  
-  
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
@@ -180,23 +185,34 @@ const HospitalPatientsTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredPatients.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((patient) => (
-                <TableRow key={patient.patientId}>
-                  <TableCell>{patient.chfId}</TableCell>
-                  <TableCell>{patient.user.firstName} {patient.user.lastName}</TableCell>
-                  <TableCell>{patient.cancer?.cancerName || 'N/A'}</TableCell>
-                  <TableCell>{patient.doctor?.firstName} {patient.doctor?.lastName}</TableCell>
-                  <TableCell>{patient.status?.status_details?.label || 'N/A'}</TableCell>
-                  <TableCell>
-                    <IconButton  color="primary">
-                      <Visibility />
-                    </IconButton>
-                    <IconButton onClick={() => handleOpenAssignDoctorModal(patient)} color="primary">
-                      <Edit />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {filteredPatients
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((patient: any) => (
+                  <TableRow key={patient.patientId}>
+                    <TableCell>{patient.chfId}</TableCell>
+                    <TableCell>
+                      {patient.user.firstName} {patient.user.lastName}
+                    </TableCell>
+                    <TableCell>{patient.cancer?.cancerName || 'N/A'}</TableCell>
+                    <TableCell>
+                      {patient.doctor
+                        ? `${patient.doctor.firstName} ${patient.doctor.lastName}`
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell>{patient.status?.status_details?.label || 'N/A'}</TableCell>
+                    <TableCell>
+                      <IconButton color="primary">
+                        <Visibility />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleOpenAssignDoctorModal(patient)}
+                        color="primary"
+                      >
+                        <Edit />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
           <TablePagination
@@ -220,7 +236,7 @@ const HospitalPatientsTable = () => {
               value={selectedDoctor || ''}
               onChange={(e) => setSelectedDoctor(e.target.value)}
             >
-              {doctors.map((doctor) => (
+              {doctors.map((doctor: any) => (
                 <MenuItem key={doctor.id} value={doctor.id}>
                   {doctor.firstName} {doctor.lastName}
                 </MenuItem>
@@ -230,23 +246,18 @@ const HospitalPatientsTable = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseAssignDoctorModal}>Cancel</Button>
-          {/* <Button onClick={handleDoctorAssign} color="primary" variant="contained">
-            Assign
-          </Button> */}
-          {/* <Button variant="contained" color="primary" onClick={handleDoctorAssign} disabled={assigning}>
-                        
-                        {assigning ? <CircularProgress size={24} color="inherit" /> : "Assign"}
-                      </Button> */}
-
-                      <Button
-  variant="contained"
-  color="primary"
-  onClick={handleDoctorAssign}
-  disabled={assigning[selectedPatient?.patientId]}
->
-  {assigning[selectedPatient?.patientId] ? <CircularProgress size={24} color="inherit" /> : "Assign"}
-</Button>
-
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleDoctorAssign}
+            disabled={assigning[selectedPatient?.patientId]}
+          >
+            {assigning[selectedPatient?.patientId] ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Assign'
+            )}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

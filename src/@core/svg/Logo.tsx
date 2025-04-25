@@ -73,14 +73,24 @@ const Logo = (props: SVGAttributes<SVGElement>) => {
     //   />
     // </svg>
     // <Image alt='Resilience Nigeria - National Cancer Health Fund' src={"/images/resilience-logo2.png"} width={"100%"} height={"100%"} />
-    <Image 
-  alt="Resilience Nigeria - National Cancer Health Fund"
-  // src="/images/resilience-logo2.png"
-  src="/images/CHFLogo2.svg"
-  layout="responsive"
-  width={400}
-  height={100} // Adjust aspect ratio accordingly
-/>
+//     <Image 
+//   alt="Resilience Nigeria - National Cancer Health Fund"
+//   // src="/images/resilience-logo2.png"
+//   src="/images/CHFLogo.svg"
+//   layout="responsive"
+//   width={400}
+//   height={120} // Adjust aspect ratio accordingly
+// />
+
+<div style={{ width: 'auto', height: 'auto', maxWidth: '400px' }}>
+  <Image
+    alt="Resilience Nigeria - National Childhood Cancer Fund"
+    src="/images/CHFLogo.svg"
+    layout="responsive"
+    width={400} // Define aspect ratio (e.g., 500:600 = 5:6)
+    height={100} // Adjust to match desired aspect ratio
+  />
+</div>
 
   )
 }

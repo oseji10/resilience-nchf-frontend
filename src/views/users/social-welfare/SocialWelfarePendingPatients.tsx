@@ -108,8 +108,10 @@ const [appearance, setAppearance] = useState('');
     }
 
     setAssigning(true);
+   
     try {
       const token = Cookies.get('authToken');
+      
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_APP_URL}/patient/mdt/assessment`,
         {
@@ -156,9 +158,12 @@ const [appearance, setAppearance] = useState('');
     }).then(async (result) => {
       if (result.isConfirmed) {
         setAssigning(true);
+        
         try {
           const token = Cookies.get('authToken');
+          
           const response = await axios.post(
+            
             `${process.env.NEXT_PUBLIC_APP_URL}/patient/mdt/assessment`,
             {
               patientId: selectedPatient.patientId,

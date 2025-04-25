@@ -300,12 +300,7 @@ const App = () => {
   href: "/dashboard/users/social-welfare/patients",
   permission: "social_welfare_manage_patients",
 },
-{
-  label: "Reviewed Patients",
-  icon: <i className="ri-check-fill" />,
-  href: "/dashboard/users/social-welfare/reviewed",
-  permission: "social_welfare_manage_patients",
-},
+
 {
   label: "Pending Patients",
   icon: <i className="ri-hourglass-fill" />,
@@ -313,6 +308,12 @@ const App = () => {
   permission: "social_welfare_manage_patients",
 },
 
+{
+  label: "Reviewed Patients",
+  icon: <i className="ri-check-fill" />,
+  href: "/dashboard/users/social-welfare/reviewed",
+  permission: "social_welfare_manage_patients",
+},
 
 // MDT Roles
 {
